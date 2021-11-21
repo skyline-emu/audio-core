@@ -3,5 +3,5 @@ A cut down version of *yuzu*'s `src/common` folder reimplementing functionality 
 * Only `DECLARE_ENUM_FLAG_OPERATORS` is implemented in `common_funcs.h`
 * Only `DEBUG_ASSERT` and `INSERT_PADDING_*` are implemented in `assert.h`
 * Only a subset of used settings are implemented in `setttings.h`
-* All `LOG_*` macros are stubbed in `log.h`
+* All `LOG_*` macros are handled by proxy in `log.h`
 * Any unscoped classes are placed in the `AudioCore` namespace to avoid include conflicts
