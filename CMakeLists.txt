@@ -195,8 +195,6 @@ add_library(audio_core STATIC
     sink/sink_stream.h
 )
 
-create_target_directory_groups(audio_core)
-
 if (MSVC)
     target_compile_options(audio_core PRIVATE
         /we4242 # 'identifier': conversion from 'type1' to 'type2', possible loss of data
@@ -211,32 +209,4 @@ else()
 
         -Wno-sign-conversion
     )
-endif()
-
-if (ARCHITECTURE_x86_64 OR ARCHITECTURE_arm64)
-    target_link_libraries(audio_core PRIVATE dynarmic::dynarmic)
-endif()
-
-if (ENABLE_CUBEB)
-    target_sources(audio_core PRIVATE
-        sink/cubeb_sink.cpp
-        sink/cubeb_sink.h
-    )
-
-    target_link_libraries(audio_core PRIVATE cubeb::cubeb)
-    target_compile_definitions(audio_core PRIVATE -DHAVE_CUBEB=1)
-endif()
-
-if (ENABLE_SDL2)
-    target_sources(audio_core PRIVATE
-        sink/sdl2_sink.cpp
-        sink/sdl2_sink.h
-    )
-
-    target_link_libraries(audio_core PRIVATE SDL2::SDL2)
-    target_compile_definitions(audio_core PRIVATE HAVE_SDL2)
-endif()
-
-if (YUZU_USE_PRECOMPILED_HEADERS)
-    target_precompile_headers(audio_core PRIVATE precompiled_headers.h)
 endif()
