@@ -5,6 +5,8 @@
 
 #include <exception>
 
+#define UNREACHABLE() throw std::runtime_error("Unreachable!")
+
 #ifdef NDEBUG
 #define DEBUG_ASSERT(condition)
 #else

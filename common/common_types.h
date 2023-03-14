@@ -21,3 +21,9 @@ using s8 = __int8_t; //!< Signed 8-bit integer
 
 using f32 = float; //!< 32-bit floating point
 using f64 = double; //!< 64-bit floating point
+
+using u16_le = u16;
+using u32_le = u32;
+using s32_le = s32;
+
+using VAddr = u64;    ///< Represents a pointer in the userspace virtual address space.

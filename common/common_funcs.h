@@ -40,3 +40,9 @@
         using TYPE = std::underlying_type_t<ENUMTYPE>;                             \
         return static_cast<TYPE>(key) == 0;                                        \
     }
+
+namespace Common {
+[[nodiscard]] constexpr u32 MakeMagic(char a, char b, char c, char d) {
+    return u32(a) | u32(b) << 8 | u32(c) << 16 | u32(d) << 24;
+}
+}
