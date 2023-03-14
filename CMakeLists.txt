@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 add_library(audio_core STATIC
+    core/core.cpp
     audio_core.cpp
     audio_core.h
     audio_event.h
@@ -210,3 +211,13 @@ else()
         -Wno-sign-conversion
     )
 endif()
+
+target_link_libraries(audio_core PUBLIC fmt::fmt)
+
+target_sources(audio_core PRIVATE
+    sink/cubeb_sink.cpp
+    sink/cubeb_sink.h
+)
+
+target_link_libraries(audio_core PRIVATE cubeb)
+target_compile_definitions(audio_core PRIVATE -DHAVE_CUBEB=1)
