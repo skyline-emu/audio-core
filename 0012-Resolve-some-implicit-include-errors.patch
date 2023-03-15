@@ -1,0 +1,39 @@
+From 6a9b5d07739506078ed981329a34edd9780315eb Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Wed, 15 Mar 2023 13:29:10 +0000
+Subject: [PATCH 12/12] Resolve some implicit include errors
+
+Much of audio core relies on algorithm.h being implicitly included, so include it as part of common_types.h to workaround that.
+---
+ common/common_types.h       | 1 +
+ core/hle/kernel/k_process.h | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/common/common_types.h b/common/common_types.h
+index 0d61a7a..4f706ad 100644
+--- a/common/common_types.h
++++ b/common/common_types.h
+@@ -5,6 +5,7 @@
+ 
+ #include <array>
+ #include <cstdint>
++#include <algorithm>
+ #include "log.h"
+ 
+ using u128 = __uint128_t; //!< Unsigned 128-bit integer
+diff --git a/core/hle/kernel/k_process.h b/core/hle/kernel/k_process.h
+index 73fbec5..098763b 100644
+--- a/core/hle/kernel/k_process.h
++++ b/core/hle/kernel/k_process.h
+@@ -3,6 +3,8 @@
+ 
+ #pragma once
+ 
++#include <audio_core/common/alignment.h>
++
+ namespace KernelShim {
+ class KProcess {};
+ }
+-- 
+2.39.0
+

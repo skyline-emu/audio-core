@@ -1,0 +1,480 @@
+From 7423e1c436b65b669f29a8bc9557a801666d7f11 Mon Sep 17 00:00:00 2001
+From: PixelyIon <pixelyion@protonmail.com>
+Date: Sat, 20 Nov 2021 22:02:00 +0530
+Subject: [PATCH 02/12] Implement yuzu `common` within license exemption
+ constraints
+
+The shader compiler use a subset of yuzu's `common`, this contains a lot of GPL code that isn't covered under our exemptions so we needed to selectively reimplement parts of it alongside certain parts that just don't map to Skyline such as `Settings`.
+---
+ CMakeLists.txt             |  1 -
+ common/README.md           |  7 +++
+ common/alignment.h         | 93 ++++++++++++++++++++++++++++++++++++++
+ common/assert.h            | 12 +++++
+ common/bit_cast.h          | 17 +++++++
+ common/bit_field.h         | 40 ++++++++++++++++
+ common/bit_util.h          | 46 +++++++++++++++++++
+ common/common_funcs.h      | 42 +++++++++++++++++
+ common/common_types.h      | 23 ++++++++++
+ common/div_ceil.h          | 25 ++++++++++
+ common/log.h               |  8 ++++
+ common/logging/formatter.h | 20 ++++++++
+ common/settings.h          | 25 ++++++++++
+ 13 files changed, 358 insertions(+), 1 deletion(-)
+ create mode 100644 common/README.md
+ create mode 100644 common/alignment.h
+ create mode 100644 common/assert.h
+ create mode 100644 common/bit_cast.h
+ create mode 100644 common/bit_field.h
+ create mode 100644 common/bit_util.h
+ create mode 100644 common/common_funcs.h
+ create mode 100644 common/common_types.h
+ create mode 100644 common/div_ceil.h
+ create mode 100644 common/log.h
+ create mode 100644 common/logging/formatter.h
+ create mode 100644 common/settings.h
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e7b5954..418eb5c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -213,7 +213,6 @@ else()
+     )
+ endif()
+ 
+-target_link_libraries(audio_core PUBLIC common core)
+ if (ARCHITECTURE_x86_64 OR ARCHITECTURE_arm64)
+     target_link_libraries(audio_core PRIVATE dynarmic::dynarmic)
+ endif()
+diff --git a/common/README.md b/common/README.md
+new file mode 100644
+index 0000000..0c7fcf3
+--- /dev/null
++++ b/common/README.md
+@@ -0,0 +1,7 @@
++A cut down version of *yuzu*'s `src/common` folder reimplementing functionality used by the audio renderer with reimplementations where files don't fall under the licensing exemption. This may lead to incompatibilities with upstream and should be kept in mind, some of the discrepancies are:
++* No support for endianess in `bit_field.h`
++* Only `DECLARE_ENUM_FLAG_OPERATORS` is implemented in `common_funcs.h`
++* Only `DEBUG_ASSERT` and `INSERT_PADDING_*` are implemented in `assert.h`
++* Only a subset of used settings are implemented in `setttings.h`
++* All `LOG_*` macros are stubbed in `log.h`
++* Any unscoped classes are placed in the `AudioCore` namespace to avoid include conflicts
+diff --git a/common/alignment.h b/common/alignment.h
+new file mode 100644
+index 0000000..8570c7d
+--- /dev/null
++++ b/common/alignment.h
+@@ -0,0 +1,93 @@
++// This file is under the public domain.
++
++#pragma once
++
++#include <cstddef>
++#include <new>
++#include <type_traits>
++
++namespace Common {
++
++template <typename T>
++requires std::is_unsigned_v<T>
++[[nodiscard]] constexpr T AlignUp(T value, size_t size) {
++    auto mod{static_cast<T>(value % size)};
++    value -= mod;
++    return static_cast<T>(mod == T{0} ? value : value + size);
++}
++
++template <typename T>
++requires std::is_unsigned_v<T>
++[[nodiscard]] constexpr T AlignUpLog2(T value, size_t align_log2) {
++    return static_cast<T>((value + ((1ULL << align_log2) - 1)) >> align_log2 << align_log2);
++}
++
++template <typename T>
++requires std::is_unsigned_v<T>
++[[nodiscard]] constexpr T AlignDown(T value, size_t size) {
++    return static_cast<T>(value - value % size);
++}
++
++template <typename T>
++requires std::is_unsigned_v<T>
++[[nodiscard]] constexpr bool Is4KBAligned(T value) {
++    return (value & 0xFFF) == 0;
++}
++
++template <typename T>
++requires std::is_unsigned_v<T>
++[[nodiscard]] constexpr bool IsWordAligned(T value) {
++    return (value & 0b11) == 0;
++}
++
++template <typename T>
++requires std::is_integral_v<T>
++[[nodiscard]] constexpr bool IsAligned(T value, size_t alignment) {
++    using U = typename std::make_unsigned_t<T>;
++    const U mask = static_cast<U>(alignment - 1);
++    return (value & mask) == 0;
++}
++
++template <typename T, typename U>
++requires std::is_integral_v<T>
++[[nodiscard]] constexpr T DivideUp(T x, U y) {
++    return (x + (y - 1)) / y;
++}
++
++template <typename T, size_t Align = 16>
++class AlignmentAllocator {
++public:
++    using value_type = T;
++    using size_type = size_t;
++    using difference_type = ptrdiff_t;
++
++    using propagate_on_container_copy_assignment = std::true_type;
++    using propagate_on_container_move_assignment = std::true_type;
++    using propagate_on_container_swap = std::true_type;
++    using is_always_equal = std::false_type;
++
++    constexpr AlignmentAllocator() noexcept = default;
++
++    template <typename T2>
++    constexpr AlignmentAllocator(const AlignmentAllocator<T2, Align>&) noexcept {}
++
++    [[nodiscard]] T* allocate(size_type n) {
++        return static_cast<T*>(::operator new (n * sizeof(T), std::align_val_t{Align}));
++    }
++
++    void deallocate(T* p, size_type n) {
++        ::operator delete (p, n * sizeof(T), std::align_val_t{Align});
++    }
++
++    template <typename T2>
++    struct rebind {
++        using other = AlignmentAllocator<T2, Align>;
++    };
++
++    template <typename T2, size_t Align2>
++    constexpr bool operator==(const AlignmentAllocator<T2, Align2>&) const noexcept {
++        return std::is_same_v<T, T2> && Align == Align2;
++    }
++};
++
++} // namespace Common
+diff --git a/common/assert.h b/common/assert.h
+new file mode 100644
+index 0000000..9915232
+--- /dev/null
++++ b/common/assert.h
+@@ -0,0 +1,12 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <exception>
++
++#ifdef NDEBUG
++#define DEBUG_ASSERT(condition)
++#else
++#define DEBUG_ASSERT(condition) if (!(condition)) throw std::runtime_error("Cannot fulfill condition: " #condition)
++#endif
+diff --git a/common/bit_cast.h b/common/bit_cast.h
+new file mode 100644
+index 0000000..168fc86
+--- /dev/null
++++ b/common/bit_cast.h
+@@ -0,0 +1,17 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <type_traits>
++
++namespace Common {
++    /**
++     * @brief A temporary shim for C++ 20's bit_cast to make transitioning to it easier
++     */
++    template<typename To, typename From>
++    requires (sizeof(To) == sizeof(From) && std::is_trivially_copyable_v<To> && std::is_trivially_copyable_v<From>)
++    To BitCast(const From &from) {
++        return *reinterpret_cast<const To *>(&from);
++    }
++}
+diff --git a/common/bit_field.h b/common/bit_field.h
+new file mode 100644
+index 0000000..c4e16cb
+--- /dev/null
++++ b/common/bit_field.h
+@@ -0,0 +1,40 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2019 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
++
++#pragma once
++
++#include "common_types.h"
++#include "bit_cast.h"
++
++namespace AudioCore {
++    #pragma pack(push, 1)
++    template<size_t Start, size_t Count, typename Type>
++    struct BitField {
++      private:
++        constexpr static size_t BitsInByte{8};
++        constexpr static size_t PaddingBits{Start % BitsInByte};
++
++        u8 paddingBytes[Start / BitsInByte];
++        size_t item : PaddingBits + Count;
++
++      public:
++        constexpr void Assign(const Type &value) {
++            constexpr size_t PaddingMask{(1 << PaddingBits) - 1};
++            size_t newValue{static_cast<size_t>(value) << PaddingBits};
++            item = newValue | (item & PaddingMask);
++        }
++
++        constexpr Type Value() const {
++            return static_cast<Type>(item >> PaddingBits);
++        }
++
++        constexpr operator Type() const {
++            return Value();
++        }
++
++        constexpr explicit operator bool() const {
++            return Value() != 0;
++        }
++    };
++    #pragma pack(pop)
++}
+diff --git a/common/bit_util.h b/common/bit_util.h
+new file mode 100644
+index 0000000..b57126a
+--- /dev/null
++++ b/common/bit_util.h
+@@ -0,0 +1,46 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2018 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
++
++#pragma once
++
++#include <bit>
++#include <climits>
++#include <cstddef>
++
++#include "common/common_types.h"
++
++namespace Common {
++
++/// Gets the size of a specified type T in bits.
++    template <typename T>
++    [[nodiscard]] constexpr std::size_t BitSize() {
++        return sizeof(T) * CHAR_BIT;
++    }
++
++    [[nodiscard]] constexpr u32 MostSignificantBit32(const u32 value) {
++        return 31U - static_cast<u32>(std::countl_zero(value));
++    }
++
++    [[nodiscard]] constexpr u32 MostSignificantBit64(const u64 value) {
++        return 63U - static_cast<u32>(std::countl_zero(value));
++    }
++
++    [[nodiscard]] constexpr u32 Log2Floor32(const u32 value) {
++        return MostSignificantBit32(value);
++    }
++
++    [[nodiscard]] constexpr u32 Log2Floor64(const u64 value) {
++        return MostSignificantBit64(value);
++    }
++
++    [[nodiscard]] constexpr u32 Log2Ceil32(const u32 value) {
++        const u32 log2_f = Log2Floor32(value);
++        return log2_f + static_cast<u32>((value ^ (1U << log2_f)) != 0U);
++    }
++
++    [[nodiscard]] constexpr u32 Log2Ceil64(const u64 value) {
++        const u64 log2_f = Log2Floor64(value);
++        return static_cast<u32>(log2_f + static_cast<u64>((value ^ (1ULL << log2_f)) != 0ULL));
++    }
++
++} // namespace Common
+diff --git a/common/common_funcs.h b/common/common_funcs.h
+new file mode 100644
+index 0000000..e2b02d2
+--- /dev/null
++++ b/common/common_funcs.h
+@@ -0,0 +1,42 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2019 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
++
++#pragma once
++
++#include "common_types.h"
++
++#define CONCAT_INNER(a, b) a ## b
++#define CONCAT(a, b) CONCAT_INNER(a, b)
++#define PAD_NAME CONCAT(CONCAT(_pad, __COUNTER__), _)
++
++#define INSERT_PADDING_BYTES(byteCount) u8 PAD_NAME[byteCount]{}
++#define INSERT_PADDING_WORDS(wordCount) u32 PAD_NAME[wordCount]{}
++
++#define INSERT_PADDING_BYTES_NOINIT(byteCount) u8 PAD_NAME[byteCount]
++#define INSERT_PADDING_WORDS_NOINIT(wordCount) u32 PAD_NAME[wordCount]
++
++#define DECLARE_ENUM_FLAG_OPERATORS(ENUMTYPE)                                      \
++    constexpr ENUMTYPE operator|(ENUMTYPE a, ENUMTYPE b) {                         \
++        using TYPE = std::underlying_type_t<ENUMTYPE>;                             \
++        return static_cast<ENUMTYPE>(static_cast<TYPE>(a) | static_cast<TYPE>(b)); \
++    }                                                                              \
++    constexpr ENUMTYPE operator&(ENUMTYPE a, ENUMTYPE b) {                         \
++        using TYPE = std::underlying_type_t<ENUMTYPE>;                             \
++        return static_cast<ENUMTYPE>(static_cast<TYPE>(a) & static_cast<TYPE>(b)); \
++    }                                                                              \
++    constexpr ENUMTYPE& operator|=(ENUMTYPE& a, ENUMTYPE b) {                      \
++        a = a | b;                                                                 \
++        return a;                                                                  \
++    }                                                                              \
++    constexpr ENUMTYPE& operator&=(ENUMTYPE& a, ENUMTYPE b) {                      \
++        a = a & b;                                                                 \
++        return a;                                                                  \
++    }                                                                              \
++    constexpr bool True(ENUMTYPE key) noexcept {                                   \
++        using TYPE = std::underlying_type_t<ENUMTYPE>;                             \
++        return static_cast<TYPE>(key) != 0;                                        \
++    }                                                                              \
++    constexpr bool False(ENUMTYPE key) noexcept {                                  \
++        using TYPE = std::underlying_type_t<ENUMTYPE>;                             \
++        return static_cast<TYPE>(key) == 0;                                        \
++    }
+diff --git a/common/common_types.h b/common/common_types.h
+new file mode 100644
+index 0000000..14acd24
+--- /dev/null
++++ b/common/common_types.h
+@@ -0,0 +1,23 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <array>
++#include <cstdint>
++#include "log.h"
++
++using u128 = __uint128_t; //!< Unsigned 128-bit integer
++using u64 = __uint64_t; //!< Unsigned 64-bit integer
++using u32 = __uint32_t; //!< Unsigned 32-bit integer
++using u16 = __uint16_t; //!< Unsigned 16-bit integer
++using u8 = __uint8_t; //!< Unsigned 8-bit integer
++
++using s128 = __int128_t; //!< Signed 128-bit integer
++using s64 = __int64_t; //!< Signed 64-bit integer
++using s32 = __int32_t; //!< Signed 32-bit integer
++using s16 = __int16_t; //!< Signed 16-bit integer
++using s8 = __int8_t; //!< Signed 8-bit integer
++
++using f32 = float; //!< 32-bit floating point
++using f64 = double; //!< 64-bit floating point
+diff --git a/common/div_ceil.h b/common/div_ceil.h
+new file mode 100644
+index 0000000..9754295
+--- /dev/null
++++ b/common/div_ceil.h
+@@ -0,0 +1,25 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2020 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
++
++#pragma once
++
++#include <cstddef>
++#include <type_traits>
++
++namespace Common {
++
++/// Ceiled integer division.
++template <typename N, typename D>
++requires std::is_integral_v<N> && std::is_unsigned_v<D>
++[[nodiscard]] constexpr N DivCeil(N number, D divisor) {
++    return static_cast<N>((static_cast<D>(number) + divisor - 1) / divisor);
++}
++
++/// Ceiled integer division with logarithmic divisor in base 2
++template <typename N, typename D>
++requires std::is_integral_v<N> && std::is_unsigned_v<D>
++[[nodiscard]] constexpr N DivCeilLog2(N value, D alignment_log2) {
++    return static_cast<N>((static_cast<D>(value) + (D(1) << alignment_log2) - 1) >> alignment_log2);
++}
++
++} // namespace Common
+diff --git a/common/log.h b/common/log.h
+new file mode 100644
+index 0000000..5e01521
+--- /dev/null
++++ b/common/log.h
+@@ -0,0 +1,8 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#define LOG_DEBUG(...)
++#define LOG_WARNING(...)
++#define LOG_ERROR(...)
+diff --git a/common/logging/formatter.h b/common/logging/formatter.h
+new file mode 100644
+index 0000000..d8378ba
+--- /dev/null
++++ b/common/logging/formatter.h
+@@ -0,0 +1,20 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <type_traits>
++
++#include <fmt/format.h>
++
++// adapted from https://github.com/fmtlib/fmt/issues/2704
++// a generic formatter for enum classes
++#if FMT_VERSION >= 80100
++template <typename E>
++struct fmt::formatter<E, std::enable_if_t<std::is_enum_v<E>, char>> : formatter<std::underlying_type_t<E>> {
++    template <typename FormatContext>
++    auto format(const E& value, FormatContext& ctx) -> decltype(ctx.out()) {
++        return fmt::formatter<std::underlying_type_t<E>>::format(static_cast<std::underlying_type_t<E>>(value), ctx);
++    }
++};
++#endif
+diff --git a/common/settings.h b/common/settings.h
+new file mode 100644
+index 0000000..0fda6a5
+--- /dev/null
++++ b/common/settings.h
+@@ -0,0 +1,25 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include "common_types.h"
++
++namespace AudioCore {
++    /**
++     * @note Only contains the settings relevant to audio core
++     */
++    struct Values {
++        std::string sink_id;
++        std::string audio_output_device_id;
++        std::string audio_input_device_id;
++        bool dump_audio_commands;
++        u8 volume;
++
++        u8 Volume() const {
++            return volume;
++        }
++    };
++
++    static inline Values values{}; //!< A static structure with the values set by Skyline code
++}
+-- 
+2.39.0
+

@@ -1,0 +1,48 @@
+From 4f883f8497c51f764966d6443734eb50aae597ff Mon Sep 17 00:00:00 2001
+From: PixelyIon <pixelyion@protonmail.com>
+Date: Sun, 21 Nov 2021 15:05:49 +0530
+Subject: [PATCH 03/12] Implement Skyline Proxy Logger
+
+We define certain functions that will be implemented in Skyline to allow for zero-overhead interaction between them while allowing the shader compiler to directly use Skyline's Logger APIs.
+---
+ common/README.md |  2 +-
+ common/log.h     | 15 ++++++++++++---
+ 2 files changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/common/README.md b/common/README.md
+index 0c7fcf3..52734e6 100644
+--- a/common/README.md
++++ b/common/README.md
+@@ -3,5 +3,5 @@ A cut down version of *yuzu*'s `src/common` folder reimplementing functionality
+ * Only `DECLARE_ENUM_FLAG_OPERATORS` is implemented in `common_funcs.h`
+ * Only `DEBUG_ASSERT` and `INSERT_PADDING_*` are implemented in `assert.h`
+ * Only a subset of used settings are implemented in `setttings.h`
+-* All `LOG_*` macros are stubbed in `log.h`
++* All `LOG_*` macros are handled by proxy in `log.h`
+ * Any unscoped classes are placed in the `AudioCore` namespace to avoid include conflicts
+diff --git a/common/log.h b/common/log.h
+index 5e01521..53aaf9a 100644
+--- a/common/log.h
++++ b/common/log.h
+@@ -3,6 +3,15 @@
+ 
+ #pragma once
+ 
+-#define LOG_DEBUG(...)
+-#define LOG_WARNING(...)
+-#define LOG_ERROR(...)
++#include <fmt/format.h>
++
++namespace AudioCore::Log {
++    // Proxy logging framework, these functions are implemented by Skyline
++    void Debug(const std::string& message);
++    void Warn(const std::string& message);
++    void Error(const std::string& message);
++}
++
++#define LOG_DEBUG(tag, message, ...) AudioCore::Log::Debug(fmt::format("Audio Core (" #tag "): " message __VA_OPT__(,) __VA_ARGS__))
++#define LOG_WARNING(tag, message, ...) AudioCore::Log::Warn(fmt::format("Audio Core (" #tag "): " message __VA_OPT__(,) __VA_ARGS__))
++#define LOG_ERROR(tag, message, ...) AudioCore::Log::Error(fmt::format("Audio Core (" #tag "): " message __VA_OPT__(,) __VA_ARGS__))
+-- 
+2.39.0
+

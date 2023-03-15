@@ -1,0 +1,38 @@
+From 4744dd83e86c65b85650c2ed9d86b5d8bb29f68d Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Tue, 14 Mar 2023 23:18:49 +0000
+Subject: [PATCH 08/12] Update cmake config for skyline
+
+---
+ CMakeLists.txt | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 786b564..74ed0b5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,6 +2,7 @@
+ # SPDX-License-Identifier: GPL-2.0-or-later
+ 
+ add_library(audio_core STATIC
++    core/core.cpp
+     audio_core.cpp
+     audio_core.h
+     audio_event.h
+@@ -210,3 +211,13 @@ else()
+         -Wno-sign-conversion
+     )
+ endif()
++
++target_link_libraries(audio_core PUBLIC fmt::fmt)
++
++target_sources(audio_core PRIVATE
++    sink/cubeb_sink.cpp
++    sink/cubeb_sink.h
++)
++
++target_link_libraries(audio_core PRIVATE cubeb)
++target_compile_definitions(audio_core PRIVATE -DHAVE_CUBEB=1)
+-- 
+2.39.0
+

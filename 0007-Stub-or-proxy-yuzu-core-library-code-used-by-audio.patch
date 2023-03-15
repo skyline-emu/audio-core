@@ -1,0 +1,512 @@
+From 69c4246f3b20fe295fdbfb24f5131228ba2eec7a Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Tue, 14 Mar 2023 23:15:15 +0000
+Subject: [PATCH 07/12] Stub or proxy yuzu core library code used by audio
+
+KernelShim types are replaced with wrappers that can forward to appropriate skyline versions.
+---
+ core/core.cpp                       | 38 ++++++++++++
+ core/core.h                         | 79 ++++++++++++++++++++++++
+ core/core_timing.h                  | 94 +++++++++++++++++++++++++++++
+ core/core_timing_util.h             | 27 +++++++++
+ core/hle/kernel/k_event.h           | 38 ++++++++++++
+ core/hle/kernel/k_process.h         |  8 +++
+ core/hle/kernel/k_transfer_memory.h | 21 +++++++
+ core/hle/kernel/svc.h               | 10 +++
+ core/hle/service/audio/errors.h     | 54 +++++++++++++++++
+ core/memory.h                       | 51 ++++++++++++++++
+ 10 files changed, 420 insertions(+)
+ create mode 100644 core/core.cpp
+ create mode 100644 core/core.h
+ create mode 100644 core/core_timing.h
+ create mode 100644 core/core_timing_util.h
+ create mode 100644 core/hle/kernel/k_event.h
+ create mode 100644 core/hle/kernel/k_process.h
+ create mode 100644 core/hle/kernel/k_transfer_memory.h
+ create mode 100644 core/hle/kernel/svc.h
+ create mode 100644 core/hle/service/audio/errors.h
+ create mode 100644 core/memory.h
+
+diff --git a/core/core.cpp b/core/core.cpp
+new file mode 100644
+index 0000000..f13f416
+--- /dev/null
++++ b/core/core.cpp
+@@ -0,0 +1,38 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#include <audio_core/audio_core.h>
++#include "core_timing.h"
++#include "memory.h"
++#include "core.h"
++
++namespace Core {
++
++System::System() : memory{std::make_unique<Memory::Memory>()}, audio_core{std::make_unique<AudioCore::AudioCore>(*this)}, core_timing{std::make_unique<Core::Timing::CoreTiming>()} {}
++
++System::~System() = default;
++
++Core::Memory::Memory& System::Memory() {
++    return *memory;
++}
++
++const Core::Memory::Memory& System::Memory() const {
++    return *memory;
++}
++
++AudioCore::AudioCore& System::AudioCore() {
++    return *audio_core;
++}
++
++const AudioCore::AudioCore& System::AudioCore() const {
++    return *audio_core;
++}
++
++Timing::CoreTiming& System::CoreTiming() {
++    return *core_timing;
++}
++
++const Timing::CoreTiming& System::CoreTiming() const {
++    return *core_timing;
++}
++}
+diff --git a/core/core.h b/core/core.h
+new file mode 100644
+index 0000000..45dfaa3
+--- /dev/null
++++ b/core/core.h
+@@ -0,0 +1,79 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <mutex>
++#include <memory>
++
++namespace KernelShim {
++class KProcess;
++}
++namespace AudioCore {
++class AudioCore;
++} // namespace AudioCore
++
++namespace Core::Timing {
++class CoreTiming;
++}
++
++namespace Core::Memory {
++class Memory;
++} // namespace Core::Memory
++
++
++namespace Core {
++class System {
++private:
++    std::mutex stall_mutex;
++    std::unique_ptr<Core::Memory::Memory> memory;
++    std::unique_ptr<AudioCore::AudioCore> audio_core;
++    std::unique_ptr<Timing::CoreTiming> core_timing;
++
++  public:
++    System();
++
++    ~System();
++
++    /// Gets a mutable reference to the system memory instance.
++    [[nodiscard]] Core::Memory::Memory& Memory();
++
++    /// Gets a constant reference to the system memory instance.
++    [[nodiscard]] const Core::Memory::Memory& Memory() const;
++
++    /// Gets a mutable reference to the audio interface
++    [[nodiscard]] AudioCore::AudioCore& AudioCore();
++
++    /// Gets an immutable reference to the audio interface.
++    [[nodiscard]] const AudioCore::AudioCore& AudioCore() const;
++
++    /// Provides a reference to the core timing instance.
++    [[nodiscard]] Timing::CoreTiming& CoreTiming();
++
++    /// Provides a constant reference to the core timing instance.
++    [[nodiscard]] const Timing::CoreTiming& CoreTiming() const;
++
++    bool IsMulticore() const {
++        return true;
++    }
++
++    bool IsShuttingDown() const {
++        return false;
++    }
++
++    bool IsPaused() const {
++        return false;
++    }
++
++    std::unique_lock<std::mutex> StallApplication() {
++        return std::unique_lock<std::mutex>{stall_mutex};
++    };
++
++    void UnstallApplication() const {};
++
++    KernelShim::KProcess *ApplicationProcess() {
++        return nullptr;
++    }
++};
++
++}
+diff --git a/core/core_timing.h b/core/core_timing.h
+new file mode 100644
+index 0000000..ca112c5
+--- /dev/null
++++ b/core/core_timing.h
+@@ -0,0 +1,94 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <chrono>
++#include <set>
++#include <string>
++#include <functional>
++#include <memory>
++#include <optional>
++#include <thread>
++#include <audio_core/common/polyfill_thread.h>
++#include <audio_core/common/common_types.h>
++
++namespace Core::Timing {
++
++/// Implemented on skyline side
++u64 GetClockTicks();
++std::chrono::nanoseconds GetClockNs();
++
++using TimedCallback = std::function<std::optional<std::chrono::nanoseconds>(
++    std::uintptr_t user_data, s64 time, std::chrono::nanoseconds ns_late)>;
++
++/// Contains the characteristics of a particular event.
++struct EventType {
++    void ThreadFunc() {
++        auto expected_time{std::chrono::system_clock::now() + start_time};
++        std::this_thread::sleep_until(expected_time);
++        while (!thread->get_stop_token().stop_requested()) {
++            callback(0, 0, {});
++            expected_time += resched_time;
++            std::this_thread::sleep_until(expected_time);
++        }
++    }
++
++    explicit EventType(TimedCallback&& callback_, std::string&& name_)
++        : callback{std::move(callback_)}, name{std::move(name_)} {}
++
++    void Run(std::chrono::nanoseconds _start_time,
++             std::chrono::nanoseconds _resched_time) {
++        start_time = _start_time;
++        resched_time = _resched_time;
++        thread.emplace(&EventType::ThreadFunc, this);
++    }
++
++    void Stop() {
++        if (thread.value().joinable()) {
++            thread->request_stop();
++            thread->join();
++        }
++    }
++
++    /// The event's callback function.
++    TimedCallback callback;
++    std::optional<std::jthread> thread;
++    std::chrono::nanoseconds start_time;
++    std::chrono::nanoseconds resched_time;
++    /// A pointer to the name of the event.
++    const std::string name;
++};
++
++class CoreTiming {
++private:
++    std::set<std::shared_ptr<EventType>> scheduled_events;
++public:
++    void ScheduleLoopingEvent(std::chrono::nanoseconds start_time,
++                              std::chrono::nanoseconds resched_time,
++                              const std::shared_ptr<EventType>& event_type,
++                              std::uintptr_t user_data = 0, bool absolute_time = false) {
++        scheduled_events.emplace(event_type);
++        event_type->Run(start_time, resched_time);
++    }
++
++    void UnscheduleEvent(const std::shared_ptr<EventType>& event_type, std::uintptr_t user_data,
++                         bool wait = true) {
++        event_type->Stop();
++        scheduled_events.erase(event_type);
++    }
++
++    u64 GetClockTicks() {
++        return Core::Timing::GetClockTicks();
++    }
++
++    std::chrono::nanoseconds GetGlobalTimeNs() const {
++        return GetClockNs();
++    }
++};
++
++inline std::shared_ptr<EventType> CreateEvent(std::string name, TimedCallback&& callback) {
++    return std::make_shared<EventType>(std::move(callback), std::move(name));
++}
++}
++
+diff --git a/core/core_timing_util.h b/core/core_timing_util.h
+new file mode 100644
+index 0000000..3d86558
+--- /dev/null
++++ b/core/core_timing_util.h
+@@ -0,0 +1,27 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <chrono>
++#include <audio_core/common/common_types.h>
++
++namespace Core::Timing {
++namespace detail {
++template<s64 TARGET_FREQ>
++inline s64 ScaleCycles(s64 cycles) {
++    static constexpr s64 TEGRA_X1_CNTFREQ{19200000};
++
++    return static_cast<s64>(((cycles / TEGRA_X1_CNTFREQ) * TARGET_FREQ) +
++                            (((cycles % TEGRA_X1_CNTFREQ) * TARGET_FREQ + (TEGRA_X1_CNTFREQ / 2)) / TEGRA_X1_CNTFREQ));
++}
++}
++
++[[nodiscard]] constexpr std::chrono::nanoseconds CyclesToNs(s64 cycles) {
++    return std::chrono::nanoseconds{detail::ScaleCycles<1000000000L>(cycles)};
++}
++
++[[nodiscard]] constexpr std::chrono::microseconds CyclesToUs(s64 cycles) {
++    return std::chrono::microseconds{detail::ScaleCycles<1000000L>(cycles)};
++}
++}
+diff --git a/core/hle/kernel/k_event.h b/core/hle/kernel/k_event.h
+new file mode 100644
+index 0000000..6e3b56f
+--- /dev/null
++++ b/core/hle/kernel/k_event.h
+@@ -0,0 +1,38 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#include <utility>
++
++#pragma once
++
++namespace KernelShim {
++class KEvent;
++
++class KReadableEvent {
++  public:
++    KEvent *event;
++};
++
++class KEvent {
++private:
++    KReadableEvent readable_event;
++    std::function<void()> signal_callback;
++    std::function<void()> clear_callback;
++
++public:
++    KEvent(std::function<void()> &&signal_callback, std::function<void()> &&clear_callback) : readable_event{this}, signal_callback{std::move(signal_callback)}, clear_callback{std::move(clear_callback)} {};
++
++    void Signal() {
++        signal_callback();
++    }
++
++    void Clear() {
++        clear_callback();
++    }
++
++    KReadableEvent& GetReadableEvent() {
++        return readable_event;
++    }
++};
++
++}
+diff --git a/core/hle/kernel/k_process.h b/core/hle/kernel/k_process.h
+new file mode 100644
+index 0000000..73fbec5
+--- /dev/null
++++ b/core/hle/kernel/k_process.h
+@@ -0,0 +1,8 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++namespace KernelShim {
++class KProcess {};
++}
+diff --git a/core/hle/kernel/k_transfer_memory.h b/core/hle/kernel/k_transfer_memory.h
+new file mode 100644
+index 0000000..5ec9541
+--- /dev/null
++++ b/core/hle/kernel/k_transfer_memory.h
+@@ -0,0 +1,21 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <vector>
++#include <audio_core/common/common_types.h>
++
++namespace KernelShim {
++class KTransferMemory {
++public:
++    KTransferMemory(size_t size) : data(size) {}
++
++    VAddr GetSourceAddress() {
++        return reinterpret_cast<VAddr>(data.data());
++    }
++
++private:
++    std::vector<u8> data;
++};
++}
+diff --git a/core/hle/kernel/svc.h b/core/hle/kernel/svc.h
+new file mode 100644
+index 0000000..ebce3fd
+--- /dev/null
++++ b/core/hle/kernel/svc.h
+@@ -0,0 +1,10 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <audio_core/common/common_types.h>
++
++namespace KernelShim::Svc {
++static constexpr u32 CurrentProcess{};
++}
+diff --git a/core/hle/service/audio/errors.h b/core/hle/service/audio/errors.h
+new file mode 100644
+index 0000000..804b5c1
+--- /dev/null
++++ b/core/hle/service/audio/errors.h
+@@ -0,0 +1,54 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <audio_core/common/common_types.h>
++
++namespace AudioCore {
++union Result {
++    u32 raw{};
++    struct __attribute__((packed)) {
++        u16 module : 9;
++        u16 id : 12;
++    };
++
++    /**
++     * @note Success is 0, it's the only result that's not specific to a module
++     */
++    constexpr Result() = default;
++
++    constexpr Result(u32 val) : raw{val}  {}
++
++    constexpr Result(u16 module, u16 id) : module(module), id(id) {}
++
++    constexpr operator u32() const {
++        return raw;
++    }
++
++    bool IsError() const {
++        return raw != 0;
++    }
++
++    bool IsSuccess() const {
++        return raw == 0;
++    }
++};
++
++static constexpr Result ResultSuccess{};
++}
++
++namespace Service::Audio {
++constexpr AudioCore::Result ResultNotFound{153, 1};
++constexpr AudioCore::Result ResultOperationFailed{153, 2};
++constexpr AudioCore::Result ResultInvalidSampleRate{153, 3};
++constexpr AudioCore::Result ResultInsufficientBuffer{153, 4};
++constexpr AudioCore::Result ResultOutOfSessions{153, 5};
++constexpr AudioCore::Result ResultBufferCountReached{153, 8};
++constexpr AudioCore::Result ResultInvalidChannelCount{153, 10};
++constexpr AudioCore::Result ResultInvalidUpdateInfo{153, 41};
++constexpr AudioCore::Result ResultInvalidAddressInfo{153, 42};
++constexpr AudioCore::Result ResultNotSupported{153, 513};
++constexpr AudioCore::Result ResultInvalidHandle{153, 1536};
++constexpr AudioCore::Result ResultInvalidRevision{153, 1537};
++}
+diff --git a/core/memory.h b/core/memory.h
+new file mode 100644
+index 0000000..3c8cda4
+--- /dev/null
++++ b/core/memory.h
+@@ -0,0 +1,51 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2023 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <audio_core/common/common_types.h>
++#include "hle/kernel/k_process.h"
++
++namespace Core::Memory {
++constexpr std::size_t YUZU_PAGEBITS = 12;
++constexpr u64 YUZU_PAGESIZE = 1ULL << YUZU_PAGEBITS;
++constexpr u64 YUZU_PAGEMASK = YUZU_PAGESIZE - 1;
++
++/// Central class that handles all memory operations and state.
++class Memory {
++public:
++    u8* GetPointer(VAddr vaddr) {
++        return reinterpret_cast<u8*>(vaddr);
++    }
++
++    template <typename T>
++    T* GetPointer(VAddr vaddr) {
++        return reinterpret_cast<T*>(GetPointer(vaddr));
++    }
++
++    const u8* GetPointer(VAddr vaddr) const {
++        return reinterpret_cast<const u8*>(vaddr);
++    }
++
++    template <typename T>
++    const T* GetPointer(VAddr vaddr) const {
++        return reinterpret_cast<T*>(GetPointer(vaddr));
++    }
++
++    void Write32(VAddr addr, u32 data) {
++        *GetPointer<u32>(addr) = data;
++    }
++
++    void ReadBlockUnsafe(VAddr src_addr, void* dest_buffer, std::size_t size) {
++        std::memcpy(dest_buffer, GetPointer<void>(src_addr), size);
++    }
++
++    void WriteBlockUnsafe(VAddr dest_addr, const void* src_buffer, std::size_t size) {
++        std::memcpy(GetPointer<void>(dest_addr), src_buffer, size);
++    }
++
++    void ZeroBlock(KernelShim::KProcess &proc, VAddr dest_addr, std::size_t size) {
++        std::memset(GetPointer<void>(dest_addr), 0, size);
++    }
++};
++}
+-- 
+2.39.0
+

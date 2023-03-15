@@ -1,0 +1,29 @@
+From 599f680829b2b0967e002025cbc4b76ccb1402e4 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Wed, 15 Mar 2023 13:26:56 +0000
+Subject: [PATCH 11/12] Move Result to AudioCore ns
+
+---
+ audio_manager.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/audio_manager.h b/audio_manager.h
+index 0227024..448ec49 100644
+--- a/audio_manager.h
++++ b/audio_manager.h
+@@ -13,10 +13,10 @@
+ 
+ #include "audio_core/audio_event.h"
+ 
+-union Result;
+-
+ namespace AudioCore {
+ 
++union Result;
++
+ /**
+  * The AudioManager's main purpose is to wait for buffer events for the audio in and out managers,
+  * and call an associated callback to release buffers.
+-- 
+2.39.0
+

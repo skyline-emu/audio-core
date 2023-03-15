@@ -1,0 +1,31 @@
+From d5e4a7025ca4a04d41030c7852e7ab15ac9d4249 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Wed, 15 Mar 2023 13:09:41 +0000
+Subject: [PATCH 10/12] Add include symlinks
+
+---
+ include/audio_core | 1 +
+ include/core       | 1 +
+ 2 files changed, 2 insertions(+)
+ create mode 120000 include/audio_core
+ create mode 120000 include/core
+
+diff --git a/include/audio_core b/include/audio_core
+new file mode 120000
+index 0000000..a96aa0e
+--- /dev/null
++++ b/include/audio_core
+@@ -0,0 +1 @@
++..
+\ No newline at end of file
+diff --git a/include/core b/include/core
+new file mode 120000
+index 0000000..c73d9e1
+--- /dev/null
++++ b/include/core
+@@ -0,0 +1 @@
++../core
+\ No newline at end of file
+-- 
+2.39.0
+

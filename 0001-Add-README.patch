@@ -1,0 +1,24 @@
+From a81617f9a2161e939110bcd934b7dbe85dcdd47f Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Wed, 15 Mar 2023 14:09:39 +0000
+Subject: [PATCH 01/12] Add README
+
+---
+ README.md | 5 +++++
+ 1 file changed, 5 insertions(+)
+ create mode 100644 README.md
+
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..2af21f0
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,5 @@
++## Freestanding Yuzu Audio Core
++A fork of [*yuzu*'s](https://github.com/yuzu-emu/yuzu/) [audio backend](https://github.com/yuzu-emu/yuzu/tree/master/src/audio_core) modified for Skyline's needs with all other changes being upstreamed and changes from *yuzu* being downstreamed as possible which benefits both projects with shared progress.
++
++### Licensing
++Audio Core is licensed under [Mozilla Public License, version 2.0](LICENSE.md) as stated by the terms of the [license exemption granted by *yuzu* contributors](https://github.com/yuzu-emu/yuzu#license). Various common parts are BSD and MIT licensed.
+-- 
+2.39.0
+
