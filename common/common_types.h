@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cstdint>
+#include <algorithm>
 #include "log.h"
 
 using u128 = __uint128_t; //!< Unsigned 128-bit integer

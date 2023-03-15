@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <audio_core/common/alignment.h>
+
 namespace Kernel {
 class KProcess {};
 }
