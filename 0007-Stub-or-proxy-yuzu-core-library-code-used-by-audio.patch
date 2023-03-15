@@ -1,9 +1,9 @@
 From 69c4246f3b20fe295fdbfb24f5131228ba2eec7a Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Tue, 14 Mar 2023 23:15:15 +0000
-Subject: [PATCH 07/12] Stub or proxy yuzu core library code used by audio
+Subject: [PATCH 07/13] Stub or proxy yuzu core library code used by audio
 
-KernelShim types are replaced with wrappers that can forward to appropriate skyline versions.
+Kernel types are replaced with wrappers that can forward to appropriate skyline versions.
 ---
  core/core.cpp                       | 38 ++++++++++++
  core/core.h                         | 79 ++++++++++++++++++++++++
@@ -85,7 +85,7 @@ index 0000000..45dfaa3
 +#include <mutex>
 +#include <memory>
 +
-+namespace KernelShim {
++namespace Kernel {
 +class KProcess;
 +}
 +namespace AudioCore {
@@ -150,7 +150,7 @@ index 0000000..45dfaa3
 +
 +    void UnstallApplication() const {};
 +
-+    KernelShim::KProcess *ApplicationProcess() {
++    Kernel::KProcess *ApplicationProcess() {
 +        return nullptr;
 +    }
 +};
@@ -302,7 +302,7 @@ index 0000000..6e3b56f
 +
 +#pragma once
 +
-+namespace KernelShim {
++namespace Kernel {
 +class KEvent;
 +
 +class KReadableEvent {
@@ -344,7 +344,7 @@ index 0000000..73fbec5
 +
 +#pragma once
 +
-+namespace KernelShim {
++namespace Kernel {
 +class KProcess {};
 +}
 diff --git a/core/hle/kernel/k_transfer_memory.h b/core/hle/kernel/k_transfer_memory.h
@@ -361,7 +361,7 @@ index 0000000..5ec9541
 +#include <vector>
 +#include <audio_core/common/common_types.h>
 +
-+namespace KernelShim {
++namespace Kernel {
 +class KTransferMemory {
 +public:
 +    KTransferMemory(size_t size) : data(size) {}
@@ -387,7 +387,7 @@ index 0000000..ebce3fd
 +
 +#include <audio_core/common/common_types.h>
 +
-+namespace KernelShim::Svc {
++namespace Kernel::Svc {
 +static constexpr u32 CurrentProcess{};
 +}
 diff --git a/core/hle/service/audio/errors.h b/core/hle/service/audio/errors.h
@@ -502,7 +502,7 @@ index 0000000..3c8cda4
 +        std::memcpy(GetPointer<void>(dest_addr), src_buffer, size);
 +    }
 +
-+    void ZeroBlock(KernelShim::KProcess &proc, VAddr dest_addr, std::size_t size) {
++    void ZeroBlock(Kernel::KProcess &proc, VAddr dest_addr, std::size_t size) {
 +        std::memset(GetPointer<void>(dest_addr), 0, size);
 +    }
 +};

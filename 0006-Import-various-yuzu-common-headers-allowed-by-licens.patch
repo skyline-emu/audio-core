@@ -1,7 +1,7 @@
 From 6ee6354e63f8aca3ee3f268a35d2d14cfaed0f04 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Tue, 14 Mar 2023 23:08:29 +0000
-Subject: [PATCH 06/12] Import various yuzu common headers allowed by licensing
+Subject: [PATCH 06/13] Import various yuzu common headers allowed by licensing
 
 Either non-GPL or covered by GPL exception.
 ---
@@ -808,7 +808,7 @@ index 0000000..61df1d3
 +++ b/common/concepts.h
 @@ -0,0 +1,35 @@
 +// SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
-+// SPDX-License-Identifier: MPL-2.0
++// SPDX-License-Identifier: GPL-2.0-or-later
 +
 +#pragma once
 +
@@ -1507,7 +1507,7 @@ index 0000000..b5ef055
 +++ b/common/polyfill_thread.h
 @@ -0,0 +1,368 @@
 +// SPDX-FileCopyrightText: 2022 yuzu Emulator Project
-+// SPDX-License-Identifier: MPL-2.0
++// SPDX-License-Identifier: GPL-2.0-or-later
 +
 +//
 +// TODO: remove this file when jthread is supported by all compilation targets
@@ -2827,7 +2827,7 @@ index 0000000..4c328ab
 +++ b/common/ring_buffer.h
 @@ -0,0 +1,116 @@
 +// SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-+// SPDX-License-Identifier: MPL-2.0
++// SPDX-License-Identifier: GPL-2.0-or-later
 +
 +#pragma once
 +

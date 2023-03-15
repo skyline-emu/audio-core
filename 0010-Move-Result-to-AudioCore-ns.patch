@@ -1,7 +1,7 @@
-From 599f680829b2b0967e002025cbc4b76ccb1402e4 Mon Sep 17 00:00:00 2001
+From d03844c9b17a93a287db194996daeb5a2a3a34fb Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Wed, 15 Mar 2023 13:26:56 +0000
-Subject: [PATCH 11/12] Move Result to AudioCore ns
+Subject: [PATCH 10/13] Move Result to AudioCore ns
 
 ---
  audio_manager.h | 4 ++--

@@ -1,7 +1,7 @@
 From c333b4ce605470086d2e6e6b6e015cfd845e5b18 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Sun, 12 Mar 2023 15:20:14 +0000
-Subject: [PATCH 04/12] Remove yuzu specific handling from CMakeLists
+Subject: [PATCH 04/13] Remove yuzu specific handling from CMakeLists
 
 ---
  CMakeLists.txt | 30 ------------------------------

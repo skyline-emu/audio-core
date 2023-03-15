@@ -1,7 +1,7 @@
 From 4f883f8497c51f764966d6443734eb50aae597ff Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Sun, 21 Nov 2021 15:05:49 +0530
-Subject: [PATCH 03/12] Implement Skyline Proxy Logger
+Subject: [PATCH 03/13] Implement Skyline Proxy Logger
 
 We define certain functions that will be implemented in Skyline to allow for zero-overhead interaction between them while allowing the shader compiler to directly use Skyline's Logger APIs.
 ---

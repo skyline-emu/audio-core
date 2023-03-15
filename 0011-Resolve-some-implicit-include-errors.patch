@@ -1,7 +1,7 @@
-From 6a9b5d07739506078ed981329a34edd9780315eb Mon Sep 17 00:00:00 2001
+From 2f40f8c83c3464cb9e8eec904e002e6a4fcd426d Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Wed, 15 Mar 2023 13:29:10 +0000
-Subject: [PATCH 12/12] Resolve some implicit include errors
+Subject: [PATCH 11/13] Resolve some implicit include errors
 
 Much of audio core relies on algorithm.h being implicitly included, so include it as part of common_types.h to workaround that.
 ---
@@ -31,7 +31,7 @@ index 73fbec5..098763b 100644
  
 +#include <audio_core/common/alignment.h>
 +
- namespace KernelShim {
+ namespace Kernel {
  class KProcess {};
  }
 -- 

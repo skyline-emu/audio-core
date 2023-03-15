@@ -1,7 +1,7 @@
-From d5e4a7025ca4a04d41030c7852e7ab15ac9d4249 Mon Sep 17 00:00:00 2001
+From d1058202cfae608bd6f3ab68fcf9f08d34dbe496 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Wed, 15 Mar 2023 13:09:41 +0000
-Subject: [PATCH 10/12] Add include symlinks
+Subject: [PATCH 09/13] Add include symlinks
 
 ---
  include/audio_core | 1 +

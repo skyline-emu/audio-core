@@ -1,7 +1,7 @@
 From 36d5978d3b29c69e047e622ec06fd49ba2d4a922 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Tue, 14 Mar 2023 23:07:41 +0000
-Subject: [PATCH 05/12] Extend yuzu common stubs
+Subject: [PATCH 05/13] Extend yuzu common stubs
 
 ---
  common/assert.h          |  2 ++

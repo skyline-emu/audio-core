@@ -1,7 +1,7 @@
 From 7423e1c436b65b669f29a8bc9557a801666d7f11 Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Sat, 20 Nov 2021 22:02:00 +0530
-Subject: [PATCH 02/12] Implement yuzu `common` within license exemption
+Subject: [PATCH 02/13] Implement yuzu `common` within license exemption
  constraints
 
 The shader compiler use a subset of yuzu's `common`, this contains a lot of GPL code that isn't covered under our exemptions so we needed to selectively reimplement parts of it alongside certain parts that just don't map to Skyline such as `Settings`.
