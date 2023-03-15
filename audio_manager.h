@@ -13,9 +13,9 @@
 
 #include "audio_core/audio_event.h"
 
-union Result;
-
 namespace AudioCore {
+
+union Result;
 
 /**
  * The AudioManager's main purpose is to wait for buffer events for the audio in and out managers,
