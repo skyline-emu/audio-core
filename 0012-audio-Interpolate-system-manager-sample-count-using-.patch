@@ -1,0 +1,150 @@
+From d8fc3f403b62e2b3d67ec08791fdc66847ddb4ac Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Sat, 18 Mar 2023 20:52:02 +0000
+Subject: [PATCH 1/4] audio: Interpolate system manager sample count using host
+ sink sample info
+
+This avoids the need to stall if the host sink sporadically misses the deadline, in such a case the previous implementation would report them samples as being played on-time, causing the guest to send more samples and leading to a gradual buildup.
+---
+ device/device_session.cpp   |  3 +--
+ renderer/system_manager.cpp |  1 -
+ sink/sink_stream.cpp        | 21 +++++++++++++++++++++
+ sink/sink_stream.h          | 17 +++++++++++++++++
+ 4 files changed, 39 insertions(+), 3 deletions(-)
+
+diff --git a/device/device_session.cpp b/device/device_session.cpp
+index 5a327a606..ad0f40e28 100644
+--- a/device/device_session.cpp
++++ b/device/device_session.cpp
+@@ -121,8 +121,7 @@ u64 DeviceSession::GetPlayedSampleCount() const {
+ }
+ 
+ std::optional<std::chrono::nanoseconds> DeviceSession::ThreadFunc() {
+-    // Add 5ms of samples at a 48K sample rate.
+-    played_sample_count += 48'000 * INCREMENT_TIME / 1s;
++    played_sample_count = stream->GetExpectedPlayedSampleCount();
+     if (type == Sink::StreamType::Out) {
+         system.AudioCore().GetAudioManager().SetEvent(Event::Type::AudioOutManager, true);
+     } else {
+diff --git a/renderer/system_manager.cpp b/renderer/system_manager.cpp
+index ce631f810..9ddfa4a91 100644
+--- a/renderer/system_manager.cpp
++++ b/renderer/system_manager.cpp
+@@ -15,7 +15,6 @@ MICROPROFILE_DEFINE(Audio_RenderSystemManager, "Audio", "Render System Manager",
+                     MP_RGB(60, 19, 97));
+ 
+ namespace AudioCore::AudioRenderer {
+-constexpr std::chrono::nanoseconds RENDER_TIME{5'000'000UL};
+ 
+ SystemManager::SystemManager(Core::System& core_)
+     : core{core_}, adsp{core.AudioCore().GetADSP()}, mailbox{adsp.GetRenderMailbox()},
+diff --git a/sink/sink_stream.cpp b/sink/sink_stream.cpp
+index 39a21b0f0..1af96f793 100644
+--- a/sink/sink_stream.cpp
++++ b/sink/sink_stream.cpp
+@@ -14,6 +14,8 @@
+ #include "common/fixed_point.h"
+ #include "common/settings.h"
+ #include "core/core.h"
++#include "core/core_timing.h"
++#include "core/core_timing_util.h"
+ 
+ namespace AudioCore::Sink {
+ 
+@@ -198,6 +200,7 @@ void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::siz
+     const std::size_t frame_size = num_channels;
+     const std::size_t frame_size_bytes = frame_size * sizeof(s16);
+     size_t frames_written{0};
++    size_t actual_frames_written{0};
+ 
+     // If we're paused or going to shut down, we don't want to consume buffers as coretiming is
+     // paused and we'll desync, so just play silence.
+@@ -248,6 +251,7 @@ void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::siz
+                            frames_available * frame_size);
+ 
+         frames_written += frames_available;
++        actual_frames_written += frames_available;
+         playing_buffer.frames_played += frames_available;
+ 
+         // If that's all the frames in the current buffer, add its samples and mark it as
+@@ -260,6 +264,13 @@ void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::siz
+     std::memcpy(&last_frame[0], &output_buffer[(frames_written - 1) * frame_size],
+                 frame_size_bytes);
+ 
++    {
++        std::scoped_lock lk{sample_count_lock};
++        last_sample_count_update_time = Core::Timing::CyclesToUs(system.CoreTiming().GetClockTicks());
++        min_played_sample_count = max_played_sample_count;
++        max_played_sample_count += actual_frames_written;
++    }
++
+     if (system.IsMulticore() && queued_buffers <= max_queue_size) {
+         Unstall();
+     }
+@@ -282,4 +293,14 @@ void SinkStream::Unstall() {
+     stalled_lock.unlock();
+ }
+ 
++u64 SinkStream::GetExpectedPlayedSampleCount() {
++    std::scoped_lock lk{sample_count_lock};
++    auto cur_time{Core::Timing::CyclesToUs(system.CoreTiming().GetClockTicks())};
++    auto time_delta{cur_time - last_sample_count_update_time};
++    auto exp_played_sample_count{min_played_sample_count +
++                                 (TargetSampleRate * time_delta) / std::chrono::seconds{1}};
++
++    return std::min<u64>(exp_played_sample_count, max_played_sample_count);
++}
++
+ } // namespace AudioCore::Sink
+diff --git a/sink/sink_stream.h b/sink/sink_stream.h
+index 5fea72ab7..2340c936c 100644
+--- a/sink/sink_stream.h
++++ b/sink/sink_stream.h
+@@ -5,6 +5,7 @@
+ 
+ #include <array>
+ #include <atomic>
++#include <chrono>
+ #include <memory>
+ #include <mutex>
+ #include <span>
+@@ -14,6 +15,7 @@
+ #include "common/common_types.h"
+ #include "common/reader_writer_queue.h"
+ #include "common/ring_buffer.h"
++#include "common/thread.h"
+ 
+ namespace Core {
+ class System;
+@@ -210,6 +212,13 @@ public:
+      */
+     void Unstall();
+ 
++    /**
++     * Get the total number of samples expected to have been played by this stream.
++     *
++     * @return The number of samples.
++     */
++    u64 GetExpectedPlayedSampleCount();
++
+ protected:
+     /// Core system
+     Core::System& system;
+@@ -237,6 +246,14 @@ private:
+     std::atomic<u32> queued_buffers{};
+     /// The ring size for audio out buffers (usually 4, rarely 2 or 8)
+     u32 max_queue_size{};
++    /// Locks access to sample count tracking info
++    std::mutex sample_count_lock;
++    /// Minimum number of total samples that have been played since the last callback
++    u64 min_played_sample_count{};
++    /// Maximum number of total samples that can be played since the last callback
++    u64 max_played_sample_count{};
++    /// The time the two above tracking variables were last written to
++    std::chrono::microseconds last_sample_count_update_time{};
+     /// Set by the audio render/in/out system which uses this stream
+     f32 system_volume{1.0f};
+     /// Set via IAudioDevice service calls
+-- 
+2.39.0
+

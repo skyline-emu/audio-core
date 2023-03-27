@@ -1,0 +1,45 @@
+From 8fb652e1fcadeef2dab79e12893e1cfa2ebc06c3 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Mon, 27 Mar 2023 22:09:05 +0100
+Subject: [PATCH] Misc fixes
+
+---
+ CMakeLists.txt    | 2 ++
+ common/settings.h | 2 +-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 74ed0b5..14d8177 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -208,6 +208,7 @@ else()
+     target_compile_options(audio_core PRIVATE
+         -Werror=conversion
+ 
++        -Wno-braced-scalar-init
+         -Wno-sign-conversion
+     )
+ endif()
+@@ -219,5 +220,6 @@ target_sources(audio_core PRIVATE
+     sink/cubeb_sink.h
+ )
+ 
++target_include_directories(audio_core PRIVATE "include")
+ target_link_libraries(audio_core PRIVATE cubeb)
+ target_compile_definitions(audio_core PRIVATE -DHAVE_CUBEB=1)
+diff --git a/common/settings.h b/common/settings.h
+index bf836e2..fc41428 100644
+--- a/common/settings.h
++++ b/common/settings.h
+@@ -23,7 +23,7 @@ struct Values {
+     Wrapper<std::string> audio_output_device_id{"auto"};
+     Wrapper<std::string> audio_input_device_id{"auto"};
+     bool dump_audio_commands{};
+-    u8 volume{100};
++    u8 volume{200};
+ };
+ 
+ static inline Values values{}; //!< A static structure with the values set by Skyline code
+-- 
+2.39.0
+

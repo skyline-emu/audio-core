@@ -1,0 +1,55 @@
+From a930f177f06ae7aae7cdfbfc18fe406e866e63e7 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Sun, 26 Mar 2023 20:07:03 +0100
+Subject: [PATCH 3/4] Run clang-format
+
+---
+ renderer/adsp/audio_renderer.h | 2 +-
+ sink/sink_stream.cpp           | 3 ++-
+ sink/sink_stream.h             | 1 -
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/renderer/adsp/audio_renderer.h b/renderer/adsp/audio_renderer.h
+index f97f9401e..85ce6a269 100644
+--- a/renderer/adsp/audio_renderer.h
++++ b/renderer/adsp/audio_renderer.h
+@@ -10,9 +10,9 @@
+ #include "audio_core/renderer/adsp/command_buffer.h"
+ #include "audio_core/renderer/adsp/command_list_processor.h"
+ #include "common/common_types.h"
++#include "common/polyfill_thread.h"
+ #include "common/reader_writer_queue.h"
+ #include "common/thread.h"
+-#include "common/polyfill_thread.h"
+ 
+ namespace Core {
+ namespace Timing {
+diff --git a/sink/sink_stream.cpp b/sink/sink_stream.cpp
+index a54c61845..854da8752 100644
+--- a/sink/sink_stream.cpp
++++ b/sink/sink_stream.cpp
+@@ -276,7 +276,8 @@ void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::siz
+ 
+     {
+         std::scoped_lock lk{sample_count_lock};
+-        last_sample_count_update_time = Core::Timing::CyclesToUs(system.CoreTiming().GetClockTicks());
++        last_sample_count_update_time =
++            Core::Timing::CyclesToUs(system.CoreTiming().GetClockTicks());
+         min_played_sample_count = max_played_sample_count;
+         max_played_sample_count += actual_frames_written;
+     }
+diff --git a/sink/sink_stream.h b/sink/sink_stream.h
+index 709f3b0ec..9806e6d98 100644
+--- a/sink/sink_stream.h
++++ b/sink/sink_stream.h
+@@ -16,7 +16,6 @@
+ #include "common/reader_writer_queue.h"
+ #include "common/ring_buffer.h"
+ #include "common/thread.h"
+-#include "common/polyfill_thread.h"
+ 
+ namespace Core {
+ class System;
+-- 
+2.39.0
+

@@ -1,0 +1,192 @@
+From ea5dd02db9bdb9759a400907672ec6606bebb96b Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Sat, 18 Mar 2023 20:57:00 +0000
+Subject: [PATCH 2/4] audio: Wait for samples on the emulated DSP side to avoid
+ desyncs
+
+Waiting on the host side is inaccurate and leads to desyncs in the event of the sink missing a deadline that require stalls to fix. By waiting for the sink to have space before even starting rendering such desyncs can be avoided.
+---
+ .../renderer/adsp/audio_renderer.cpp           |  2 ++
+ renderer/adsp/audio_renderer.h  |  1 +
+ renderer/system_manager.cpp     | 18 +-----------------
+ renderer/system_manager.h       |  7 -------
+ sink/sink_stream.cpp            | 15 +++++++++++++++
+ sink/sink_stream.h              |  9 +++++++++
+ 6 files changed, 28 insertions(+), 24 deletions(-)
+
+diff --git a/renderer/adsp/audio_renderer.cpp b/renderer/adsp/audio_renderer.cpp
+index 42b4b167a..503f40349 100644
+--- a/renderer/adsp/audio_renderer.cpp
++++ b/renderer/adsp/audio_renderer.cpp
+@@ -189,6 +189,8 @@ void AudioRenderer::ThreadFunc() {
+                     max_time = std::min(command_buffer.time_limit, max_time);
+                     command_list_processor.SetProcessTimeMax(max_time);
+ 
++                    streams[index]->WaitFreeSpace();
++
+                     // Process the command list
+                     {
+                         MICROPROFILE_SCOPE(Audio_Renderer);
+diff --git a/renderer/adsp/audio_renderer.h b/renderer/adsp/audio_renderer.h
+index 151f38c1b..f97f9401e 100644
+--- a/renderer/adsp/audio_renderer.h
++++ b/renderer/adsp/audio_renderer.h
+@@ -12,6 +12,7 @@
+ #include "common/common_types.h"
+ #include "common/reader_writer_queue.h"
+ #include "common/thread.h"
++#include "common/polyfill_thread.h"
+ 
+ namespace Core {
+ namespace Timing {
+diff --git a/renderer/system_manager.cpp b/renderer/system_manager.cpp
+index 9ddfa4a91..07d8ed093 100644
+--- a/renderer/system_manager.cpp
++++ b/renderer/system_manager.cpp
+@@ -17,11 +17,7 @@ MICROPROFILE_DEFINE(Audio_RenderSystemManager, "Audio", "Render System Manager",
+ namespace AudioCore::AudioRenderer {
+ 
+ SystemManager::SystemManager(Core::System& core_)
+-    : core{core_}, adsp{core.AudioCore().GetADSP()}, mailbox{adsp.GetRenderMailbox()},
+-      thread_event{Core::Timing::CreateEvent(
+-          "AudioRendererSystemManager", [this](std::uintptr_t, s64 time, std::chrono::nanoseconds) {
+-              return ThreadFunc2(time);
+-          })} {}
++    : core{core_}, adsp{core.AudioCore().GetADSP()}, mailbox{adsp.GetRenderMailbox()} {}
+ 
+ SystemManager::~SystemManager() {
+     Stop();
+@@ -32,8 +28,6 @@ bool SystemManager::InitializeUnsafe() {
+         if (adsp.Start()) {
+             active = true;
+             thread = std::jthread([this](std::stop_token stop_token) { ThreadFunc(); });
+-            core.CoreTiming().ScheduleLoopingEvent(std::chrono::nanoseconds(0), RENDER_TIME,
+-                                                   thread_event);
+         }
+     }
+ 
+@@ -44,7 +38,6 @@ void SystemManager::Stop() {
+     if (!active) {
+         return;
+     }
+-    core.CoreTiming().UnscheduleEvent(thread_event, {});
+     active = false;
+     update.store(true);
+     update.notify_all();
+@@ -110,16 +103,7 @@ void SystemManager::ThreadFunc() {
+ 
+         adsp.Signal();
+         adsp.Wait();
+-
+-        update.wait(false);
+-        update.store(false);
+     }
+ }
+ 
+-std::optional<std::chrono::nanoseconds> SystemManager::ThreadFunc2(s64 time) {
+-    update.store(true);
+-    update.notify_all();
+-    return std::nullopt;
+-}
+-
+ } // namespace AudioCore::AudioRenderer
+diff --git a/renderer/system_manager.h b/renderer/system_manager.h
+index 415ddb74f..1f0bbd8b4 100644
+--- a/renderer/system_manager.h
++++ b/renderer/system_manager.h
+@@ -68,11 +68,6 @@ private:
+      */
+     void ThreadFunc();
+ 
+-    /**
+-     * Signalling core timing thread to run ThreadFunc.
+-     */
+-    std::optional<std::chrono::nanoseconds> ThreadFunc2(s64 time);
+-
+     enum class StreamState {
+         Filling,
+         Steady,
+@@ -95,8 +90,6 @@ private:
+     ADSP::ADSP& adsp;
+     /// AudioRenderer mailbox for communication
+     ADSP::AudioRenderer_Mailbox* mailbox{};
+-    /// Core timing event to signal main thread
+-    std::shared_ptr<Core::Timing::EventType> thread_event;
+     /// Atomic for main thread to wait on
+     std::atomic<bool> update{};
+ };
+diff --git a/sink/sink_stream.cpp b/sink/sink_stream.cpp
+index 1af96f793..a54c61845 100644
+--- a/sink/sink_stream.cpp
++++ b/sink/sink_stream.cpp
+@@ -205,6 +205,10 @@ void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::siz
+     // If we're paused or going to shut down, we don't want to consume buffers as coretiming is
+     // paused and we'll desync, so just play silence.
+     if (system.IsPaused() || system.IsShuttingDown()) {
++        if (system.IsShuttingDown()) {
++            release_cv.notify_one();
++        }
++
+         static constexpr std::array<s16, 6> silence{};
+         for (size_t i = frames_written; i < num_frames; i++) {
+             std::memcpy(&output_buffer[i * frame_size], &silence[0], frame_size_bytes);
+@@ -240,6 +244,12 @@ void SinkStream::ProcessAudioOutAndRender(std::span<s16> output_buffer, std::siz
+             }
+             // Successfully dequeued a new buffer.
+             queued_buffers--;
++
++            {
++                std::unique_lock lk{release_mutex};
++            }
++
++            release_cv.notify_one();
+         }
+ 
+         // Get the minimum frames available between the currently playing buffer, and the
+@@ -303,4 +313,9 @@ u64 SinkStream::GetExpectedPlayedSampleCount() {
+     return std::min<u64>(exp_played_sample_count, max_played_sample_count);
+ }
+ 
++void SinkStream::WaitFreeSpace() {
++    std::unique_lock lk{release_mutex};
++    release_cv.wait(lk, [this]() { return queued_buffers < max_queue_size || system.IsShuttingDown(); });
++}
++
+ } // namespace AudioCore::Sink
+diff --git a/sink/sink_stream.h b/sink/sink_stream.h
+index 2340c936c..709f3b0ec 100644
+--- a/sink/sink_stream.h
++++ b/sink/sink_stream.h
+@@ -16,6 +16,7 @@
+ #include "common/reader_writer_queue.h"
+ #include "common/ring_buffer.h"
+ #include "common/thread.h"
++#include "common/polyfill_thread.h"
+ 
+ namespace Core {
+ class System;
+@@ -219,6 +220,11 @@ public:
+      */
+     u64 GetExpectedPlayedSampleCount();
+ 
++    /**
++     * Waits for free space in the sample ring buffer
++     */
++    void WaitFreeSpace();
++
+ protected:
+     /// Core system
+     Core::System& system;
+@@ -258,6 +264,9 @@ private:
+     f32 system_volume{1.0f};
+     /// Set via IAudioDevice service calls
+     f32 device_volume{1.0f};
++    /// Signalled when ring buffer entries are consumed
++    std::condition_variable release_cv;
++    std::mutex release_mutex;
+     std::mutex stall_guard;
+     std::unique_lock<std::mutex> stalled_lock;
+ };
+-- 
+2.39.0
+
