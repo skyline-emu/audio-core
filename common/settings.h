@@ -23,7 +23,7 @@ struct Values {
     Wrapper<std::string> audio_output_device_id{"auto"};
     Wrapper<std::string> audio_input_device_id{"auto"};
     bool dump_audio_commands{};
-    u8 volume{100};
+    u8 volume{200};
 };
 
 static inline Values values{}; //!< A static structure with the values set by Skyline code

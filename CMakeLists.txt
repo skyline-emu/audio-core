@@ -208,6 +208,7 @@ else()
     target_compile_options(audio_core PRIVATE
         -Werror=conversion
 
+        -Wno-braced-scalar-init
         -Wno-sign-conversion
     )
 endif()
@@ -219,5 +220,6 @@ target_sources(audio_core PRIVATE
     sink/cubeb_sink.h
 )
 
+target_include_directories(audio_core PRIVATE "include")
 target_link_libraries(audio_core PRIVATE cubeb)
 target_compile_definitions(audio_core PRIVATE -DHAVE_CUBEB=1)
