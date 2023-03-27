@@ -6,7 +6,7 @@
 #include <mutex>
 #include <memory>
 
-namespace Kernel {
+namespace KernelShim {
 class KProcess;
 }
 namespace AudioCore {
@@ -71,7 +71,7 @@ private:
 
     void UnstallApplication() const {};
 
-    Kernel::KProcess *ApplicationProcess() {
+    KernelShim::KProcess *ApplicationProcess() {
         return nullptr;
     }
 };

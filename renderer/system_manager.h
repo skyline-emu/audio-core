@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
@@ -9,7 +9,7 @@
 #include <optional>
 #include <thread>
 
-#include "audio_core/renderer/system.h"
+#include <audio_core/renderer/system.h>
 
 namespace Core {
 namespace Timing {

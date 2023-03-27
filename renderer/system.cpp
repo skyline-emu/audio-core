@@ -1,38 +1,38 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #include <chrono>
 #include <span>
 
-#include "audio_core/audio_core.h"
-#include "audio_core/common/audio_renderer_parameter.h"
-#include "audio_core/common/common.h"
-#include "audio_core/common/feature_support.h"
-#include "audio_core/common/workbuffer_allocator.h"
-#include "audio_core/renderer/adsp/adsp.h"
-#include "audio_core/renderer/behavior/info_updater.h"
-#include "audio_core/renderer/command/command_buffer.h"
-#include "audio_core/renderer/command/command_generator.h"
-#include "audio_core/renderer/command/command_list_header.h"
-#include "audio_core/renderer/effect/effect_info_base.h"
-#include "audio_core/renderer/effect/effect_result_state.h"
-#include "audio_core/renderer/memory/memory_pool_info.h"
-#include "audio_core/renderer/memory/pool_mapper.h"
-#include "audio_core/renderer/mix/mix_info.h"
-#include "audio_core/renderer/nodes/edge_matrix.h"
-#include "audio_core/renderer/nodes/node_states.h"
-#include "audio_core/renderer/sink/sink_info_base.h"
-#include "audio_core/renderer/system.h"
-#include "audio_core/renderer/upsampler/upsampler_info.h"
-#include "audio_core/renderer/voice/voice_channel_resource.h"
-#include "audio_core/renderer/voice/voice_info.h"
-#include "audio_core/renderer/voice/voice_state.h"
-#include "common/alignment.h"
-#include "core/core.h"
-#include "core/core_timing.h"
-#include "core/hle/kernel/k_event.h"
-#include "core/hle/kernel/k_transfer_memory.h"
-#include "core/memory.h"
+#include <audio_core/audio_core.h>
+#include <audio_core/common/audio_renderer_parameter.h>
+#include <audio_core/common/common.h>
+#include <audio_core/common/feature_support.h>
+#include <audio_core/common/workbuffer_allocator.h>
+#include <audio_core/renderer/adsp/adsp.h>
+#include <audio_core/renderer/behavior/info_updater.h>
+#include <audio_core/renderer/command/command_buffer.h>
+#include <audio_core/renderer/command/command_generator.h>
+#include <audio_core/renderer/command/command_list_header.h>
+#include <audio_core/renderer/effect/effect_info_base.h>
+#include <audio_core/renderer/effect/effect_result_state.h>
+#include <audio_core/renderer/memory/memory_pool_info.h>
+#include <audio_core/renderer/memory/pool_mapper.h>
+#include <audio_core/renderer/mix/mix_info.h>
+#include <audio_core/renderer/nodes/edge_matrix.h>
+#include <audio_core/renderer/nodes/node_states.h>
+#include <audio_core/renderer/sink/sink_info_base.h>
+#include <audio_core/renderer/system.h>
+#include <audio_core/renderer/upsampler/upsampler_info.h>
+#include <audio_core/renderer/voice/voice_channel_resource.h>
+#include <audio_core/renderer/voice/voice_info.h>
+#include <audio_core/renderer/voice/voice_state.h>
+#include <audio_core/common/alignment.h>
+#include <core/core.h>
+#include <core/core_timing.h>
+#include <core/hle/kernel/k_event.h>
+#include <core/hle/kernel/k_transfer_memory.h>
+#include <core/memory.h>
 
 namespace AudioCore::AudioRenderer {
 
@@ -94,11 +94,11 @@ u64 System::GetWorkBufferSize(const AudioRendererParameterInternal& params) {
     return size;
 }
 
-System::System(Core::System& core_, Kernel::KEvent* adsp_rendered_event_)
+System::System(Core::System& core_, KernelShim::KEvent* adsp_rendered_event_)
     : core{core_}, adsp{core.AudioCore().GetADSP()}, adsp_rendered_event{adsp_rendered_event_} {}
 
 Result System::Initialize(const AudioRendererParameterInternal& params,
-                          Kernel::KTransferMemory* transfer_memory, u64 transfer_memory_size,
+                          KernelShim::KTransferMemory* transfer_memory, u64 transfer_memory_size,
                           u32 process_handle_, u64 applet_resource_user_id_, s32 session_id_) {
     if (!CheckValidRevision(params.revision)) {
         return Service::Audio::ResultInvalidRevision;

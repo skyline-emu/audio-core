@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
+#include <range/v3/algorithm.hpp>
 #include <map>
 #include <ranges>
 #include <tuple>
 
-#include "common/assert.h"
-#include "common/common_funcs.h"
-#include "common/common_types.h"
-#include "common/polyfill_ranges.h"
+#include <audio_core/common/assert.h>
+#include <audio_core/common/common_funcs.h>
+#include <audio_core/common/common_types.h>
+#include <audio_core/common/polyfill_ranges.h>
 
 namespace AudioCore {
 constexpr u32 CurrentRevision = 11;
@@ -90,7 +91,7 @@ constexpr bool CheckFeatureSupported(SupportTags tag, u32 user_revision) {
         }};
 
     const auto& feature =
-        std::ranges::find_if(features, [tag](const auto& entry) { return entry.first == tag; });
+        ranges::find_if(features, [tag](const auto& entry) { return entry.first == tag; });
     if (feature == features.cend()) {
         LOG_ERROR(Service_Audio, "Invalid SupportTag {}!", static_cast<u32>(tag));
         return false;

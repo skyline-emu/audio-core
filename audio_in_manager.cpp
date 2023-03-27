@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/audio_core.h"
-#include "audio_core/audio_in_manager.h"
-#include "audio_core/audio_manager.h"
-#include "audio_core/in/audio_in.h"
-#include "audio_core/sink/sink_details.h"
-#include "common/settings.h"
-#include "core/core.h"
-#include "core/hle/service/audio/errors.h"
+#include <audio_core/audio_core.h>
+#include <audio_core/audio_in_manager.h>
+#include <audio_core/audio_manager.h>
+#include <audio_core/in/audio_in.h>
+#include <audio_core/sink/sink_details.h>
+#include <audio_core/common/settings.h>
+#include <core/core.h>
+#include <core/hle/service/audio/errors.h>
 
 namespace AudioCore::AudioIn {
 

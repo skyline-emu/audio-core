@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
 #include <memory>
 #include <string>
 
-#include "audio_core/sink/sink_stream.h"
-#include "common/common_types.h"
+#include <audio_core/sink/sink_stream.h>
+#include <audio_core/common/common_types.h>
 
 namespace Common {
 class Event;

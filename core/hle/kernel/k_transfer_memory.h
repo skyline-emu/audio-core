@@ -6,7 +6,7 @@
 #include <vector>
 #include <audio_core/common/common_types.h>
 
-namespace Kernel {
+namespace KernelShim {
 class KTransferMemory {
 public:
     KTransferMemory(size_t size) : data(size) {}

@@ -1,18 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
 #include <span>
 
-#include "audio_core/renderer/system.h"
-#include "core/hle/service/audio/errors.h"
+#include <audio_core/renderer/system.h>
+#include <core/hle/service/audio/errors.h>
 
 namespace Core {
 class System;
 }
 
-namespace Kernel {
+namespace KernelShim {
 class KTransferMemory;
 }
 
@@ -27,7 +27,7 @@ class Manager;
  */
 class Renderer {
 public:
-    explicit Renderer(Core::System& system, Manager& manager, Kernel::KEvent* rendered_event);
+    explicit Renderer(Core::System& system, Manager& manager, KernelShim::KEvent* rendered_event);
 
     /**
      * Initialize the renderer.
@@ -43,7 +43,7 @@ public:
      * @return Result code.
      */
     Result Initialize(const AudioRendererParameterInternal& params,
-                      Kernel::KTransferMemory* transfer_memory, u64 transfer_memory_size,
+                      KernelShim::KTransferMemory* transfer_memory, u64 transfer_memory_size,
                       u32 process_handle, u64 applet_resource_user_id, s32 session_id);
 
     /**

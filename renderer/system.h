@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
@@ -7,18 +7,18 @@
 #include <mutex>
 #include <span>
 
-#include "audio_core/renderer/behavior/behavior_info.h"
-#include "audio_core/renderer/command/command_processing_time_estimator.h"
-#include "audio_core/renderer/effect/effect_context.h"
-#include "audio_core/renderer/memory/memory_pool_info.h"
-#include "audio_core/renderer/mix/mix_context.h"
-#include "audio_core/renderer/performance/performance_manager.h"
-#include "audio_core/renderer/sink/sink_context.h"
-#include "audio_core/renderer/splitter/splitter_context.h"
-#include "audio_core/renderer/upsampler/upsampler_manager.h"
-#include "audio_core/renderer/voice/voice_context.h"
-#include "common/thread.h"
-#include "core/hle/service/audio/errors.h"
+#include <audio_core/renderer/behavior/behavior_info.h>
+#include <audio_core/renderer/command/command_processing_time_estimator.h>
+#include <audio_core/renderer/effect/effect_context.h>
+#include <audio_core/renderer/memory/memory_pool_info.h>
+#include <audio_core/renderer/mix/mix_context.h>
+#include <audio_core/renderer/performance/performance_manager.h>
+#include <audio_core/renderer/sink/sink_context.h>
+#include <audio_core/renderer/splitter/splitter_context.h>
+#include <audio_core/renderer/upsampler/upsampler_manager.h>
+#include <audio_core/renderer/voice/voice_context.h>
+#include <audio_core/common/thread.h>
+#include <core/hle/service/audio/errors.h>
 
 namespace Core {
 namespace Memory {
@@ -27,10 +27,10 @@ class Memory;
 class System;
 } // namespace Core
 
-namespace Kernel {
+namespace KernelShim {
 class KEvent;
 class KTransferMemory;
-} // namespace Kernel
+} // namespace KernelShim
 
 namespace AudioCore {
 struct AudioRendererParameterInternal;
@@ -51,7 +51,7 @@ class System {
     };
 
 public:
-    explicit System(Core::System& core, Kernel::KEvent* adsp_rendered_event);
+    explicit System(Core::System& core, KernelShim::KEvent* adsp_rendered_event);
 
     /**
      * Calculate the total size required for all audio render workbuffers.
@@ -75,7 +75,7 @@ public:
      * @return Result code.
      */
     Result Initialize(const AudioRendererParameterInternal& params,
-                      Kernel::KTransferMemory* transfer_memory, u64 transfer_memory_size,
+                      KernelShim::KTransferMemory* transfer_memory, u64 transfer_memory_size,
                       u32 process_handle, u64 applet_resource_user_id, s32 session_id);
 
     /**
@@ -266,7 +266,7 @@ private:
     /// Number of channels in use by voices
     s32 voice_channels{};
     /// Event to be called when the AudioRenderer processes a command list
-    Kernel::KEvent* adsp_rendered_event{};
+    KernelShim::KEvent* adsp_rendered_event{};
     /// Event signalled on system terminate
     Common::Event terminate_event{};
     /// Does what locks do

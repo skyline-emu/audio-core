@@ -5,7 +5,7 @@
 
 #pragma once
 
-namespace Kernel {
+namespace KernelShim {
 class KEvent;
 
 class KReadableEvent {

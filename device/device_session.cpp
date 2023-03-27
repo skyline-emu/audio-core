@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/audio_core.h"
-#include "audio_core/audio_manager.h"
-#include "audio_core/device/audio_buffer.h"
-#include "audio_core/device/device_session.h"
-#include "audio_core/sink/sink_stream.h"
-#include "core/core.h"
-#include "core/core_timing.h"
-#include "core/memory.h"
+#include <audio_core/audio_core.h>
+#include <audio_core/audio_manager.h>
+#include <audio_core/device/audio_buffer.h>
+#include <audio_core/device/device_session.h>
+#include <audio_core/sink/sink_stream.h>
+#include <core/core.h>
+#include <core/core_timing.h>
+#include <core/memory.h>
 
 namespace AudioCore {
 

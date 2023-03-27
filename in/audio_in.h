@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
 #include <mutex>
 
-#include "audio_core/in/audio_in_system.h"
+#include <audio_core/in/audio_in_system.h>
 
 namespace Core {
 class System;
 }
 
-namespace Kernel {
+namespace KernelShim {
 class KEvent;
 class KReadableEvent;
-} // namespace Kernel
+} // namespace KernelShim
 
 namespace AudioCore::AudioIn {
 class Manager;
@@ -25,7 +25,7 @@ class Manager;
  */
 class In {
 public:
-    explicit In(Core::System& system, Manager& manager, Kernel::KEvent* event, size_t session_id);
+    explicit In(Core::System& system, Manager& manager, KernelShim::KEvent* event, size_t session_id);
 
     /**
      * Free this audio in from the audio in manager.
@@ -95,7 +95,7 @@ public:
      *
      * @return The buffer event.
      */
-    Kernel::KReadableEvent& GetBufferEvent();
+    KernelShim::KReadableEvent& GetBufferEvent();
 
     /**
      * Get the current system volume.
@@ -139,7 +139,7 @@ private:
     /// Manager's mutex
     std::recursive_mutex& parent_mutex;
     /// Buffer event, signalled when buffers are ready to be released
-    Kernel::KEvent* event;
+    KernelShim::KEvent* event;
     /// Main audio in system
     System system;
 };

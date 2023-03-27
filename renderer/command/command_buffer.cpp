@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/renderer/behavior/behavior_info.h"
-#include "audio_core/renderer/command/command_buffer.h"
-#include "audio_core/renderer/command/command_list_header.h"
-#include "audio_core/renderer/command/command_processing_time_estimator.h"
-#include "audio_core/renderer/effect/biquad_filter.h"
-#include "audio_core/renderer/effect/delay.h"
-#include "audio_core/renderer/effect/reverb.h"
-#include "audio_core/renderer/memory/memory_pool_info.h"
-#include "audio_core/renderer/mix/mix_info.h"
-#include "audio_core/renderer/sink/circular_buffer_sink_info.h"
-#include "audio_core/renderer/sink/device_sink_info.h"
-#include "audio_core/renderer/sink/sink_info_base.h"
-#include "audio_core/renderer/voice/voice_info.h"
-#include "audio_core/renderer/voice/voice_state.h"
+#include <audio_core/renderer/behavior/behavior_info.h>
+#include <audio_core/renderer/command/command_buffer.h>
+#include <audio_core/renderer/command/command_list_header.h>
+#include <audio_core/renderer/command/command_processing_time_estimator.h>
+#include <audio_core/renderer/effect/biquad_filter.h>
+#include <audio_core/renderer/effect/delay.h>
+#include <audio_core/renderer/effect/reverb.h>
+#include <audio_core/renderer/memory/memory_pool_info.h>
+#include <audio_core/renderer/mix/mix_info.h>
+#include <audio_core/renderer/sink/circular_buffer_sink_info.h>
+#include <audio_core/renderer/sink/device_sink_info.h>
+#include <audio_core/renderer/sink/sink_info_base.h>
+#include <audio_core/renderer/voice/voice_info.h>
+#include <audio_core/renderer/voice/voice_state.h>
 
 namespace AudioCore::AudioRenderer {
 

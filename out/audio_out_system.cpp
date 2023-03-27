@@ -1,19 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #include <mutex>
 
-#include "audio_core/audio_event.h"
-#include "audio_core/audio_manager.h"
-#include "audio_core/out/audio_out_system.h"
-#include "common/logging/log.h"
-#include "core/core.h"
-#include "core/core_timing.h"
-#include "core/hle/kernel/k_event.h"
+#include <audio_core/audio_event.h>
+#include <audio_core/audio_manager.h>
+#include <audio_core/out/audio_out_system.h>
+#include <audio_core/common/logging/log.h>
+#include <core/core.h>
+#include <core/core_timing.h>
+#include <core/hle/kernel/k_event.h>
 
 namespace AudioCore::AudioOut {
 
-System::System(Core::System& system_, Kernel::KEvent* event_, size_t session_id_)
+System::System(Core::System& system_, KernelShim::KEvent* event_, size_t session_id_)
     : system{system_}, buffer_event{event_},
       session_id{session_id_}, session{std::make_unique<DeviceSession>(system_)} {}
 

@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/renderer/memory/address_info.h"
-#include "audio_core/renderer/memory/pool_mapper.h"
-#include "core/hle/kernel/k_process.h"
-#include "core/hle/kernel/svc.h"
+#include <audio_core/renderer/memory/address_info.h>
+#include <audio_core/renderer/memory/pool_mapper.h>
+#include <core/hle/kernel/k_process.h>
+#include <core/hle/kernel/svc.h>
 
 namespace AudioCore::AudioRenderer {
 
@@ -111,10 +111,10 @@ u32 PoolMapper::GetProcessHandle(const MemoryPoolInfo* pool) const {
     case MemoryPoolInfo::Location::CPU:
         return process_handle;
     case MemoryPoolInfo::Location::DSP:
-        return Kernel::Svc::CurrentProcess;
+        return KernelShim::Svc::CurrentProcess;
     }
     LOG_WARNING(Service_Audio, "Invalid MemoryPoolInfo location!");
-    return Kernel::Svc::CurrentProcess;
+    return KernelShim::Svc::CurrentProcess;
 }
 
 bool PoolMapper::Map([[maybe_unused]] const u32 handle, [[maybe_unused]] const CpuAddr cpu_addr,
@@ -130,7 +130,7 @@ bool PoolMapper::Map(MemoryPoolInfo& pool) const {
         pool.SetDspAddress(pool.GetCpuAddress());
         return true;
     case MemoryPoolInfo::Location::DSP:
-        // Map with Kernel::Svc::CurrentProcess
+        // Map with KernelShim::Svc::CurrentProcess
         pool.SetDspAddress(pool.GetCpuAddress());
         return true;
     default:
@@ -154,7 +154,7 @@ bool PoolMapper::Unmap(MemoryPoolInfo& pool) const {
         handle = process_handle;
         break;
     case MemoryPoolInfo::Location::DSP:
-        handle = Kernel::Svc::CurrentProcess;
+        handle = KernelShim::Svc::CurrentProcess;
         break;
     }
     // nn::audio::dsp::UnmapUserPointer(handle, pool->cpu_address, pool->size);
@@ -228,7 +228,7 @@ bool PoolMapper::InitializeSystemPool(MemoryPoolInfo& pool, const u8* memory,
         return false;
     case MemoryPoolInfo::Location::DSP:
         pool.SetCpuAddress(reinterpret_cast<u64>(memory), size_);
-        if (Map(Kernel::Svc::CurrentProcess, reinterpret_cast<u64>(memory), size_)) {
+        if (Map(KernelShim::Svc::CurrentProcess, reinterpret_cast<u64>(memory), size_)) {
             pool.SetDspAddress(pool.GetCpuAddress());
             return true;
         }

@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #include <array>
 #include <atomic>
@@ -7,15 +7,15 @@
 #include <span>
 #include <vector>
 
-#include "audio_core/audio_core.h"
-#include "audio_core/common/common.h"
-#include "audio_core/sink/sink_stream.h"
-#include "common/common_types.h"
-#include "common/fixed_point.h"
-#include "common/settings.h"
-#include "core/core.h"
-#include "core/core_timing.h"
-#include "core/core_timing_util.h"
+#include <audio_core/audio_core.h>
+#include <audio_core/common/common.h>
+#include <audio_core/sink/sink_stream.h>
+#include <audio_core/common/common_types.h>
+#include <audio_core/common/fixed_point.h>
+#include <audio_core/common/settings.h>
+#include <core/core.h>
+#include <core/core_timing.h>
+#include <core/core_timing_util.h>
 
 namespace AudioCore::Sink {
 

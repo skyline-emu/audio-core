@@ -1,18 +1,18 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
-#include "audio_core/renderer/effect/aux_.h"
-#include "audio_core/renderer/effect/biquad_filter.h"
-#include "audio_core/renderer/effect/buffer_mixer.h"
-#include "audio_core/renderer/effect/capture.h"
-#include "audio_core/renderer/effect/compressor.h"
-#include "audio_core/renderer/effect/delay.h"
-#include "audio_core/renderer/effect/i3dl2.h"
-#include "audio_core/renderer/effect/light_limiter.h"
-#include "audio_core/renderer/effect/reverb.h"
-#include "common/common_types.h"
+#include <audio_core/renderer/effect/aux_.h>
+#include <audio_core/renderer/effect/biquad_filter.h>
+#include <audio_core/renderer/effect/buffer_mixer.h>
+#include <audio_core/renderer/effect/capture.h>
+#include <audio_core/renderer/effect/compressor.h>
+#include <audio_core/renderer/effect/delay.h>
+#include <audio_core/renderer/effect/i3dl2.h>
+#include <audio_core/renderer/effect/light_limiter.h>
+#include <audio_core/renderer/effect/reverb.h>
+#include <audio_core/common/common_types.h>
 
 namespace AudioCore::AudioRenderer {
 /**

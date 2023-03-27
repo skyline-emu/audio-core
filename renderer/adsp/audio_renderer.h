@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
@@ -7,12 +7,12 @@
 #include <memory>
 #include <thread>
 
-#include "audio_core/renderer/adsp/command_buffer.h"
-#include "audio_core/renderer/adsp/command_list_processor.h"
-#include "common/common_types.h"
-#include "common/polyfill_thread.h"
-#include "common/reader_writer_queue.h"
-#include "common/thread.h"
+#include <audio_core/renderer/adsp/command_buffer.h>
+#include <audio_core/renderer/adsp/command_list_processor.h>
+#include <audio_core/common/common_types.h>
+#include <audio_core/common/polyfill_thread.h>
+#include <audio_core/common/reader_writer_queue.h>
+#include <audio_core/common/thread.h>
 
 namespace Core {
 namespace Timing {

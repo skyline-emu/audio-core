@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #include <chrono>
 
-#include "audio_core/audio_core.h"
-#include "audio_core/renderer/adsp/adsp.h"
-#include "audio_core/renderer/system_manager.h"
-#include "common/microprofile.h"
-#include "common/thread.h"
-#include "core/core.h"
-#include "core/core_timing.h"
+#include <audio_core/audio_core.h>
+#include <audio_core/renderer/adsp/adsp.h>
+#include <audio_core/renderer/system_manager.h>
+#include <audio_core/common/microprofile.h>
+#include <audio_core/common/thread.h>
+#include <core/core.h>
+#include <core/core_timing.h>
 
 MICROPROFILE_DEFINE(Audio_RenderSystemManager, "Audio", "Render System Manager",
                     MP_RGB(60, 19, 97));

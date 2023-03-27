@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
@@ -11,11 +11,11 @@
 #include <span>
 #include <vector>
 
-#include "audio_core/common/common.h"
-#include "common/common_types.h"
-#include "common/reader_writer_queue.h"
-#include "common/ring_buffer.h"
-#include "common/thread.h"
+#include <audio_core/common/common.h>
+#include <audio_core/common/common_types.h>
+#include <audio_core/common/reader_writer_queue.h>
+#include <audio_core/common/ring_buffer.h>
+#include <audio_core/common/thread.h>
 
 namespace Core {
 class System;

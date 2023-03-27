@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
+#include <range/v3/algorithm.hpp>
 #include <numbers>
 
-#include "audio_core/renderer/adsp/command_list_processor.h"
-#include "audio_core/renderer/command/effect/i3dl2_reverb.h"
-#include "common/polyfill_ranges.h"
+#include <audio_core/renderer/adsp/command_list_processor.h>
+#include <audio_core/renderer/command/effect/i3dl2_reverb.h>
+#include <audio_core/common/polyfill_ranges.h>
 
 namespace AudioCore::AudioRenderer {
 
@@ -134,12 +135,12 @@ static void UpdateI3dl2ReverbEffectParameter(const I3dl2ReverbInfo::ParameterVer
         state.shelf_filter.fill(0.0f);
         state.lowpass_0 = 0.0f;
         for (u32 i = 0; i < I3dl2ReverbInfo::MaxDelayLines; i++) {
-            std::ranges::fill(state.fdn_delay_lines[i].buffer, 0);
-            std::ranges::fill(state.decay_delay_lines0[i].buffer, 0);
-            std::ranges::fill(state.decay_delay_lines1[i].buffer, 0);
+            ranges::fill(state.fdn_delay_lines[i].buffer, 0);
+            ranges::fill(state.decay_delay_lines0[i].buffer, 0);
+            ranges::fill(state.decay_delay_lines1[i].buffer, 0);
         }
-        std::ranges::fill(state.center_delay_line.buffer, 0);
-        std::ranges::fill(state.early_delay_line.buffer, 0);
+        ranges::fill(state.center_delay_line.buffer, 0);
+        ranges::fill(state.early_delay_line.buffer, 0);
     }
 
     const auto reflection_time{(params.late_reverb_delay_time * 0.9998f + 0.02f) * 1000.0f};

@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/audio_core.h"
-#include "audio_core/sink/sink_details.h"
-#include "common/settings.h"
-#include "core/core.h"
+#include <audio_core/audio_core.h>
+#include <audio_core/sink/sink_details.h>
+#include <audio_core/common/settings.h>
+#include <core/core.h>
 
 namespace AudioCore {
 

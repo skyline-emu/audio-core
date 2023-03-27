@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
+#include <range/v3/algorithm.hpp>
 #include <ranges>
 
-#include "audio_core/renderer/voice/voice_context.h"
-#include "common/polyfill_ranges.h"
+#include <audio_core/renderer/voice/voice_context.h>
+#include <audio_core/common/polyfill_ranges.h>
 
 namespace AudioCore::AudioRenderer {
 
@@ -74,7 +75,7 @@ void VoiceContext::SortInfo() {
         sorted_voice_info[i] = &voices[i];
     }
 
-    std::ranges::sort(sorted_voice_info, [](const VoiceInfo* a, const VoiceInfo* b) {
+    ranges::sort(sorted_voice_info, [](const VoiceInfo* a, const VoiceInfo* b) {
         return a->priority != b->priority ? a->priority > b->priority
                                           : a->sort_order > b->sort_order;
     });

@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
 #include <array>
 
-#include "audio_core/common/common.h"
-#include "audio_core/renderer/effect/effect_info_base.h"
-#include "common/common_types.h"
-#include "common/fixed_point.h"
+#include <audio_core/common/common.h>
+#include <audio_core/renderer/effect/effect_info_base.h>
+#include <audio_core/common/common_types.h>
+#include <audio_core/common/fixed_point.h>
 
 namespace AudioCore::AudioRenderer {
 

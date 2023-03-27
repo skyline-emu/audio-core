@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #include <string>
 
-#include "audio_core/renderer/adsp/command_list_processor.h"
-#include "audio_core/renderer/command/mix/clear_mix.h"
+#include <audio_core/renderer/adsp/command_list_processor.h>
+#include <audio_core/renderer/command/mix/clear_mix.h>
 
 namespace AudioCore::AudioRenderer {
 

@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/renderer/adsp/command_list_processor.h"
-#include "audio_core/renderer/command/performance/performance.h"
-#include "core/core.h"
-#include "core/core_timing.h"
-#include "core/core_timing_util.h"
+#include <audio_core/renderer/adsp/command_list_processor.h>
+#include <audio_core/renderer/command/performance/performance.h>
+#include <core/core.h>
+#include <core/core_timing.h>
+#include <core/core_timing_util.h>
 
 namespace AudioCore::AudioRenderer {
 

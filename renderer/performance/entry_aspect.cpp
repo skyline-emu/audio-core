@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/renderer/command/command_buffer.h"
-#include "audio_core/renderer/command/command_generator.h"
-#include "audio_core/renderer/performance/entry_aspect.h"
+#include <audio_core/renderer/command/command_buffer.h>
+#include <audio_core/renderer/command/command_generator.h>
+#include <audio_core/renderer/performance/entry_aspect.h>
 
 namespace AudioCore::AudioRenderer {
 

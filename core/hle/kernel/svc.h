@@ -5,6 +5,6 @@
 
 #include <audio_core/common/common_types.h>
 
-namespace Kernel::Svc {
+namespace KernelShim::Svc {
 static constexpr u32 CurrentProcess{};
 }

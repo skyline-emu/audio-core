@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
 #include <array>
 #include <bitset>
 
-#include "audio_core/common/common.h"
-#include "audio_core/common/wave_buffer.h"
-#include "audio_core/renderer/behavior/behavior_info.h"
-#include "audio_core/renderer/memory/address_info.h"
-#include "common/common_types.h"
+#include <audio_core/common/common.h>
+#include <audio_core/common/wave_buffer.h>
+#include <audio_core/renderer/behavior/behavior_info.h>
+#include <audio_core/renderer/memory/address_info.h>
+#include <audio_core/common/common_types.h>
 
 namespace AudioCore::AudioRenderer {
 class PoolMapper;

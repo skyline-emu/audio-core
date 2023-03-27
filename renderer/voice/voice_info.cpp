@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/renderer/memory/pool_mapper.h"
-#include "audio_core/renderer/voice/voice_context.h"
-#include "audio_core/renderer/voice/voice_info.h"
-#include "audio_core/renderer/voice/voice_state.h"
+#include <audio_core/renderer/memory/pool_mapper.h>
+#include <audio_core/renderer/voice/voice_context.h>
+#include <audio_core/renderer/voice/voice_info.h>
+#include <audio_core/renderer/voice/voice_state.h>
 
 namespace AudioCore::AudioRenderer {
 

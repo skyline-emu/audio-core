@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
+#include <range/v3/algorithm.hpp>
 #include <ranges>
 
-#include "audio_core/renderer/mix/mix_context.h"
-#include "audio_core/renderer/splitter/splitter_context.h"
-#include "common/polyfill_ranges.h"
+#include <audio_core/renderer/mix/mix_context.h>
+#include <audio_core/renderer/splitter/splitter_context.h>
+#include <audio_core/common/polyfill_ranges.h>
 
 namespace AudioCore::AudioRenderer {
 
@@ -96,7 +97,7 @@ void MixContext::UpdateDistancesFromFinalMix() {
 void MixContext::SortInfo() {
     UpdateDistancesFromFinalMix();
 
-    std::ranges::sort(sorted_mix_infos, [](const MixInfo* lhs, const MixInfo* rhs) {
+    ranges::sort(sorted_mix_infos, [](const MixInfo* lhs, const MixInfo* rhs) {
         return lhs->distance_from_final_mix > rhs->distance_from_final_mix;
     });
 

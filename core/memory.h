@@ -44,7 +44,7 @@ public:
         std::memcpy(GetPointer<void>(dest_addr), src_buffer, size);
     }
 
-    void ZeroBlock(Kernel::KProcess &proc, VAddr dest_addr, std::size_t size) {
+    void ZeroBlock(KernelShim::KProcess &proc, VAddr dest_addr, std::size_t size) {
         std::memset(GetPointer<void>(dest_addr), 0, size);
     }
 };

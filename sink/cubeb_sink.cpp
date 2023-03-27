@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #include <span>
 #include <vector>
 
-#include "audio_core/common/common.h"
-#include "audio_core/sink/cubeb_sink.h"
-#include "audio_core/sink/sink_stream.h"
-#include "common/logging/log.h"
-#include "core/core.h"
+#include <audio_core/common/common.h>
+#include <audio_core/sink/cubeb_sink.h>
+#include <audio_core/sink/sink_stream.h>
+#include <audio_core/common/logging/log.h>
+#include <core/core.h>
 
 #ifdef _WIN32
 #include <objbase.h>

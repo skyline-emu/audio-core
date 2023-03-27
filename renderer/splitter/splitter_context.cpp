@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/common/audio_renderer_parameter.h"
-#include "audio_core/common/workbuffer_allocator.h"
-#include "audio_core/renderer/behavior/behavior_info.h"
-#include "audio_core/renderer/splitter/splitter_context.h"
-#include "common/alignment.h"
+#include <audio_core/common/audio_renderer_parameter.h>
+#include <audio_core/common/workbuffer_allocator.h>
+#include <audio_core/renderer/behavior/behavior_info.h>
+#include <audio_core/renderer/splitter/splitter_context.h>
+#include <audio_core/common/alignment.h>
 
 namespace AudioCore::AudioRenderer {
 

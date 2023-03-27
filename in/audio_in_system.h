@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
@@ -8,16 +8,16 @@
 #include <span>
 #include <string>
 
-#include "audio_core/common/common.h"
-#include "audio_core/device/audio_buffers.h"
-#include "audio_core/device/device_session.h"
-#include "core/hle/service/audio/errors.h"
+#include <audio_core/common/common.h>
+#include <audio_core/device/audio_buffers.h>
+#include <audio_core/device/device_session.h>
+#include <core/hle/service/audio/errors.h>
 
 namespace Core {
 class System;
 }
 
-namespace Kernel {
+namespace KernelShim {
 class KEvent;
 }
 
@@ -60,7 +60,7 @@ enum class State {
  */
 class System {
 public:
-    explicit System(Core::System& system, Kernel::KEvent* event, size_t session_id);
+    explicit System(Core::System& system, KernelShim::KEvent* event, size_t session_id);
     ~System();
 
     /**
@@ -249,7 +249,7 @@ private:
     /// (Unused)
     u64 applet_resource_user_id{};
     /// Buffer event, signalled when a buffer is ready
-    Kernel::KEvent* buffer_event;
+    KernelShim::KEvent* buffer_event;
     /// Session id of this system
     size_t session_id{};
     /// Device session for this system

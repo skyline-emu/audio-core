@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/audio_event.h"
-#include "common/assert.h"
-#include "common/polyfill_ranges.h"
+#include <range/v3/algorithm.hpp>
+#include <audio_core/audio_event.h>
+#include <audio_core/common/assert.h>
+#include <audio_core/common/polyfill_ranges.h>
 
 namespace AudioCore {
 
@@ -45,7 +46,7 @@ std::condition_variable_any& Event::GetAudioEvent() {
 bool Event::Wait(std::unique_lock<std::mutex>& l, const std::chrono::seconds timeout) {
     bool timed_out{false};
     if (!manager_event.wait_for(l, timeout, [&]() {
-            return std::ranges::any_of(events_signalled, [](bool x) { return x; });
+            return ranges::any_of(events_signalled, [](bool x) { return x; });
         })) {
         timed_out = true;
     }

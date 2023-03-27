@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "audio_core/sink/sink_details.h"
+#include <audio_core/sink/sink_details.h>
 #ifdef HAVE_CUBEB
-#include "audio_core/sink/cubeb_sink.h"
+#include <audio_core/sink/cubeb_sink.h>
 #endif
 #ifdef HAVE_SDL2
-#include "audio_core/sink/sdl2_sink.h"
+#include <audio_core/sink/sdl2_sink.h>
 #endif
-#include "audio_core/sink/null_sink.h"
-#include "common/logging/log.h"
+#include <audio_core/sink/null_sink.h>
+#include <audio_core/common/logging/log.h>
 
 namespace AudioCore::Sink {
 namespace {

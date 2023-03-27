@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
 #include <numeric>
 #include <span>
 
-#include "common/assert.h"
-#include "common/common_funcs.h"
-#include "common/common_types.h"
+#include <audio_core/common/assert.h>
+#include <audio_core/common/common_funcs.h>
+#include <audio_core/common/common_types.h>
 
 namespace AudioCore {
 using CpuAddr = std::uintptr_t;

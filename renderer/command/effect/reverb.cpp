@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
+#include <range/v3/algorithm.hpp>
 #include <numbers>
 #include <ranges>
 
-#include "audio_core/renderer/adsp/command_list_processor.h"
-#include "audio_core/renderer/command/effect/reverb.h"
-#include "common/polyfill_ranges.h"
+#include <audio_core/renderer/adsp/command_list_processor.h>
+#include <audio_core/renderer/command/effect/reverb.h>
+#include <audio_core/common/polyfill_ranges.h>
 
 namespace AudioCore::AudioRenderer {
 
@@ -191,11 +192,11 @@ static void InitializeReverbEffect(const ReverbInfo::ParameterVersion2& params,
     UpdateReverbEffectParameter(params, state);
 
     for (u32 i = 0; i < ReverbInfo::MaxDelayLines; i++) {
-        std::ranges::fill(state.fdn_delay_lines[i].buffer, 0);
-        std::ranges::fill(state.decay_delay_lines[i].buffer, 0);
+        ranges::fill(state.fdn_delay_lines[i].buffer, 0);
+        ranges::fill(state.decay_delay_lines[i].buffer, 0);
     }
-    std::ranges::fill(state.center_delay_line.buffer, 0);
-    std::ranges::fill(state.pre_delay_line.buffer, 0);
+    ranges::fill(state.center_delay_line.buffer, 0);
+    ranges::fill(state.pre_delay_line.buffer, 0);
 }
 
 /**

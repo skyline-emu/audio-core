@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
 #include <memory>
 
-#include "audio_core/audio_manager.h"
-#include "audio_core/renderer/adsp/adsp.h"
-#include "audio_core/sink/sink.h"
+#include <audio_core/audio_manager.h>
+#include <audio_core/renderer/adsp/adsp.h>
+#include <audio_core/sink/sink.h>
 
 namespace Core {
 class System;

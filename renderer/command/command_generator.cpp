@@ -1,25 +1,25 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/common/audio_renderer_parameter.h"
-#include "audio_core/renderer/behavior/behavior_info.h"
-#include "audio_core/renderer/command/command_buffer.h"
-#include "audio_core/renderer/command/command_generator.h"
-#include "audio_core/renderer/command/command_list_header.h"
-#include "audio_core/renderer/effect/aux_.h"
-#include "audio_core/renderer/effect/biquad_filter.h"
-#include "audio_core/renderer/effect/buffer_mixer.h"
-#include "audio_core/renderer/effect/capture.h"
-#include "audio_core/renderer/effect/effect_context.h"
-#include "audio_core/renderer/effect/light_limiter.h"
-#include "audio_core/renderer/mix/mix_context.h"
-#include "audio_core/renderer/performance/detail_aspect.h"
-#include "audio_core/renderer/performance/entry_aspect.h"
-#include "audio_core/renderer/sink/device_sink_info.h"
-#include "audio_core/renderer/sink/sink_context.h"
-#include "audio_core/renderer/splitter/splitter_context.h"
-#include "audio_core/renderer/voice/voice_context.h"
-#include "common/alignment.h"
+#include <audio_core/common/audio_renderer_parameter.h>
+#include <audio_core/renderer/behavior/behavior_info.h>
+#include <audio_core/renderer/command/command_buffer.h>
+#include <audio_core/renderer/command/command_generator.h>
+#include <audio_core/renderer/command/command_list_header.h>
+#include <audio_core/renderer/effect/aux_.h>
+#include <audio_core/renderer/effect/biquad_filter.h>
+#include <audio_core/renderer/effect/buffer_mixer.h>
+#include <audio_core/renderer/effect/capture.h>
+#include <audio_core/renderer/effect/effect_context.h>
+#include <audio_core/renderer/effect/light_limiter.h>
+#include <audio_core/renderer/mix/mix_context.h>
+#include <audio_core/renderer/performance/detail_aspect.h>
+#include <audio_core/renderer/performance/entry_aspect.h>
+#include <audio_core/renderer/sink/device_sink_info.h>
+#include <audio_core/renderer/sink/sink_context.h>
+#include <audio_core/renderer/splitter/splitter_context.h>
+#include <audio_core/renderer/voice/voice_context.h>
+#include <audio_core/common/alignment.h>
 
 namespace AudioCore::AudioRenderer {
 

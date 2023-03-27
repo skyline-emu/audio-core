@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
@@ -7,12 +7,12 @@
 #include <memory>
 #include <span>
 
-#include "audio_core/common/audio_renderer_parameter.h"
-#include "audio_core/renderer/performance/performance_detail.h"
-#include "audio_core/renderer/performance/performance_entry.h"
-#include "audio_core/renderer/performance/performance_entry_addresses.h"
-#include "audio_core/renderer/performance/performance_frame_header.h"
-#include "common/common_types.h"
+#include <audio_core/common/audio_renderer_parameter.h>
+#include <audio_core/renderer/performance/performance_detail.h>
+#include <audio_core/renderer/performance/performance_entry.h>
+#include <audio_core/renderer/performance/performance_entry_addresses.h>
+#include <audio_core/renderer/performance/performance_frame_header.h>
+#include <audio_core/common/common_types.h>
 
 namespace AudioCore::AudioRenderer {
 class BehaviorInfo;

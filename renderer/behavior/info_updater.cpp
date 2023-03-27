@@ -1,19 +1,19 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
-#include "audio_core/common/feature_support.h"
-#include "audio_core/renderer/behavior/behavior_info.h"
-#include "audio_core/renderer/behavior/info_updater.h"
-#include "audio_core/renderer/effect/effect_context.h"
-#include "audio_core/renderer/effect/effect_reset.h"
-#include "audio_core/renderer/memory/memory_pool_info.h"
-#include "audio_core/renderer/mix/mix_context.h"
-#include "audio_core/renderer/performance/performance_manager.h"
-#include "audio_core/renderer/sink/circular_buffer_sink_info.h"
-#include "audio_core/renderer/sink/device_sink_info.h"
-#include "audio_core/renderer/sink/sink_context.h"
-#include "audio_core/renderer/splitter/splitter_context.h"
-#include "audio_core/renderer/voice/voice_context.h"
+#include <audio_core/common/feature_support.h>
+#include <audio_core/renderer/behavior/behavior_info.h>
+#include <audio_core/renderer/behavior/info_updater.h>
+#include <audio_core/renderer/effect/effect_context.h>
+#include <audio_core/renderer/effect/effect_reset.h>
+#include <audio_core/renderer/memory/memory_pool_info.h>
+#include <audio_core/renderer/mix/mix_context.h>
+#include <audio_core/renderer/performance/performance_manager.h>
+#include <audio_core/renderer/sink/circular_buffer_sink_info.h>
+#include <audio_core/renderer/sink/device_sink_info.h>
+#include <audio_core/renderer/sink/sink_context.h>
+#include <audio_core/renderer/splitter/splitter_context.h>
+#include <audio_core/renderer/voice/voice_context.h>
 
 namespace AudioCore::AudioRenderer {
 

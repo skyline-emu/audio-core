@@ -5,6 +5,6 @@
 
 #include <audio_core/common/alignment.h>
 
-namespace Kernel {
+namespace KernelShim {
 class KProcess {};
 }

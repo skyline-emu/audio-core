@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 
 #pragma once
 
 #include <span>
 
-#include "common/alignment.h"
-#include "common/assert.h"
-#include "common/common_types.h"
+#include <audio_core/common/alignment.h>
+#include <audio_core/common/assert.h>
+#include <audio_core/common/common_types.h>
 
 namespace AudioCore {
 /**
